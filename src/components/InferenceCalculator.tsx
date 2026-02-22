@@ -18,6 +18,8 @@ import {
   type InferenceParams,
 } from "@/lib/llm-calculations"
 import { motion } from "framer-motion"
+import { ExportButton } from "@/components/ExportButton"
+import type { ExportData } from "@/lib/export-utils"
 
 export function InferenceCalculator() {
   const [params, setParams] = useKV<InferenceParams>("inference-params", {
@@ -33,6 +35,13 @@ export function InferenceCalculator() {
 
   const handlePresetClick = (preset: typeof MODEL_PRESETS[0]) => {
     setParams((current) => current ? { ...current, parameters: preset.parameters } : { parameters: preset.parameters, precision: "fp16", contextLength: 4096 })
+  }
+
+  const exportData: ExportData = {
+    calculatorType: "inference",
+    timestamp: new Date().toISOString(),
+    params,
+    results: memory,
   }
 
   return (
@@ -163,10 +172,13 @@ export function InferenceCalculator() {
       >
         <Card className="border-accent/30 bg-card/50 backdrop-blur-sm glow-accent">
           <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Database size={20} className="text-accent sm:w-6 sm:h-6" weight="duotone" />
-              Memory Requirements
-            </CardTitle>
+            <div className="flex items-start justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Database size={20} className="text-accent sm:w-6 sm:h-6" weight="duotone" />
+                Memory Requirements
+              </CardTitle>
+              <ExportButton data={exportData} />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6">
             <div className="space-y-3 sm:space-y-4">

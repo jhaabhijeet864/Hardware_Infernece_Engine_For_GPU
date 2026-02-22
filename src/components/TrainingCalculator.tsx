@@ -20,6 +20,8 @@ import {
 } from "@/lib/llm-calculations"
 import { motion } from "framer-motion"
 import { Progress } from "@/components/ui/progress"
+import { ExportButton } from "@/components/ExportButton"
+import type { ExportData } from "@/lib/export-utils"
 
 export function TrainingCalculator() {
   const [params, setParams] = useState<TrainingParams>({
@@ -39,6 +41,13 @@ export function TrainingCalculator() {
   }
 
   const trainingMethod = TRAINING_METHODS.find((m) => m.value === params.method)
+
+  const exportData: ExportData = {
+    calculatorType: "training",
+    timestamp: new Date().toISOString(),
+    params,
+    results: memory,
+  }
 
   return (
     <div className="space-y-6">
@@ -223,15 +232,20 @@ export function TrainingCalculator() {
       >
         <Card className="border-accent/30 bg-card/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database size={24} className="text-accent" weight="duotone" />
-              Training Memory Requirements
-            </CardTitle>
-            {trainingMethod && (
-              <CardDescription>
-                Using {trainingMethod.label}: {trainingMethod.description}
-              </CardDescription>
-            )}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <CardTitle className="flex items-center gap-2">
+                  <Database size={24} className="text-accent" weight="duotone" />
+                  Training Memory Requirements
+                </CardTitle>
+                {trainingMethod && (
+                  <CardDescription>
+                    Using {trainingMethod.label}: {trainingMethod.description}
+                  </CardDescription>
+                )}
+              </div>
+              <ExportButton data={exportData} />
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">

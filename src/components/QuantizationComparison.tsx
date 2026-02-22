@@ -7,6 +7,8 @@ import { ChartBar, Cpu } from "@phosphor-icons/react"
 import { MODEL_PRESETS, PRECISION_OPTIONS, formatMemory } from "@/lib/llm-calculations"
 import { motion } from "framer-motion"
 import { Progress } from "@/components/ui/progress"
+import { ExportButton } from "@/components/ExportButton"
+import type { ExportData, QuantizationResults } from "@/lib/export-utils"
 
 interface QuantizationResult {
   precision: string
@@ -16,14 +18,8 @@ interface QuantizationResult {
   speedup: number
 }
 
-export function QuantizationComparison() {
-  const [modelSize, setModelSize] = useState<number>(7)
-
-  const handlePresetClick = (preset: typeof MODEL_PRESETS[0]) => {
-    setModelSize(preset.parameters)
-  }
-
-  const results: QuantizationResult[] = PRECISION_OPTIONS.map((option) => {
+function generateQuantizationResults(modelSize: number): QuantizationResults {
+  const comparisons = PRECISION_OPTIONS.map((option) => {
     const memory = modelSize * option.bytesPerParam
     let qualityRetention = 100
     let speedup = 1
@@ -56,7 +52,29 @@ export function QuantizationComparison() {
     }
   })
 
+  return {
+    modelSize,
+    comparisons,
+  }
+}
+
+export function QuantizationComparison() {
+  const [modelSize, setModelSize] = useState<number>(7)
+
+  const handlePresetClick = (preset: typeof MODEL_PRESETS[0]) => {
+    setModelSize(preset.parameters)
+  }
+
+  const quantResults = generateQuantizationResults(modelSize)
+  const results = quantResults.comparisons
   const baselineMemory = results[0].memory
+
+  const exportData: ExportData = {
+    calculatorType: "quantization",
+    timestamp: new Date().toISOString(),
+    params: { modelSize },
+    results: quantResults,
+  }
 
   return (
     <div className="space-y-6">
@@ -116,13 +134,18 @@ export function QuantizationComparison() {
       >
         <Card className="border-accent/30 bg-card/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ChartBar size={24} className="text-accent" weight="duotone" />
-              Quantization Comparison
-            </CardTitle>
-            <CardDescription>
-              Compare memory usage, quality retention, and speed across quantization methods
-            </CardDescription>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <CardTitle className="flex items-center gap-2">
+                  <ChartBar size={24} className="text-accent" weight="duotone" />
+                  Quantization Comparison
+                </CardTitle>
+                <CardDescription>
+                  Compare memory usage, quality retention, and speed across quantization methods
+                </CardDescription>
+              </div>
+              <ExportButton data={exportData} />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

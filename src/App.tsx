@@ -5,6 +5,7 @@ import { TrainingCalculator } from "@/components/TrainingCalculator"
 import { QuantizationComparison } from "@/components/QuantizationComparison"
 import { GraphicsCard, Lightning, ChartBar } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
+import { Toaster } from "@/components/ui/sonner"
 
 function App() {
   const [activeTab, setActiveTab] = useKV("active-tab", "inference")
@@ -77,6 +78,7 @@ function App() {
           </p>
         </footer>
       </div>
+      <Toaster />
     </div>
   )
 }
