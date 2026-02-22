@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useKV } from "@github/spark/hooks"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
-import { Cpu, Database, Info, GraphicsCard } from "@phosphor-icons/react"
+import { Database, Info, GraphicsCard } from "@phosphor-icons/react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   calculateInferenceMemory,
@@ -20,52 +20,54 @@ import {
 import { motion } from "framer-motion"
 
 export function InferenceCalculator() {
-  const [params, setParams] = useState<InferenceParams>({
+  const [params, setParams] = useKV<InferenceParams>("inference-params", {
     parameters: 7,
     precision: "fp16",
     contextLength: 4096,
   })
 
+  if (!params) return null
+
   const memory = calculateInferenceMemory(params)
   const recommendedGPUs = getRecommendedGPUs(memory.total)
 
   const handlePresetClick = (preset: typeof MODEL_PRESETS[0]) => {
-    setParams({ ...params, parameters: preset.parameters })
+    setParams((current) => current ? { ...current, parameters: preset.parameters } : { parameters: preset.parameters, precision: "fp16", contextLength: 4096 })
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GraphicsCard size={24} className="text-accent" weight="duotone" />
+    <div className="space-y-4 sm:space-y-6">
+      <Card className="border-border/50 backdrop-blur-sm">
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <GraphicsCard size={20} className="text-accent sm:w-6 sm:h-6" weight="duotone" />
             Model Presets
           </CardTitle>
-          <CardDescription>Quick-select popular models</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Quick-select popular models</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             {MODEL_PRESETS.map((preset) => (
               <button
                 key={preset.name}
                 onClick={() => handlePresetClick(preset)}
-                className={`px-4 py-2 rounded-lg border transition-all ${
+                className={`px-3 py-2.5 sm:px-4 sm:py-2 rounded-lg border transition-all min-h-[44px] ${
                   params.parameters === preset.parameters
-                    ? "bg-accent text-accent-foreground border-accent"
-                    : "bg-card border-border hover:border-accent/50 text-foreground"
+                    ? "bg-accent text-accent-foreground border-accent glow-accent"
+                    : "bg-card border-border hover:border-accent/50 text-foreground hover:bg-card/80"
                 }`}
               >
-                <div className="text-sm font-medium">{preset.name}</div>
-                <div className="text-xs opacity-70">{preset.parameters}B params</div>
+                <div className="text-xs sm:text-sm font-medium">{preset.name}</div>
+                <div className="text-[10px] sm:text-xs opacity-70">{preset.parameters}B params</div>
               </button>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle>Model Configuration</CardTitle>
+      <Card className="border-border/50 backdrop-blur-sm">
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-lg sm:text-xl">Model Configuration</CardTitle>
           <CardDescription>Configure model parameters for inference</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -88,7 +90,7 @@ export function InferenceCalculator() {
                 id="parameters"
                 type="number"
                 value={params.parameters}
-                onChange={(e) => setParams({ ...params, parameters: parseFloat(e.target.value) || 0 })}
+                onChange={(e) => setParams((current) => current ? { ...current, parameters: parseFloat(e.target.value) || 0 } : { parameters: parseFloat(e.target.value) || 0, precision: "fp16", contextLength: 4096 })}
                 min={0.1}
                 step={0.1}
                 className="font-mono"
@@ -99,7 +101,7 @@ export function InferenceCalculator() {
               <Label htmlFor="precision">Precision</Label>
               <Select
                 value={params.precision}
-                onValueChange={(value) => setParams({ ...params, precision: value })}
+                onValueChange={(value) => setParams((current) => current ? { ...current, precision: value } : { parameters: 7, precision: value, contextLength: 4096 })}
               >
                 <SelectTrigger id="precision">
                   <SelectValue />
@@ -137,7 +139,7 @@ export function InferenceCalculator() {
             <Slider
               id="contextLength"
               value={[params.contextLength]}
-              onValueChange={([value]) => setParams({ ...params, contextLength: value })}
+              onValueChange={([value]) => setParams((current) => current ? { ...current, contextLength: value } : { parameters: 7, precision: "fp16", contextLength: value })}
               min={512}
               max={32768}
               step={512}
@@ -157,32 +159,33 @@ export function InferenceCalculator() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
+        key={memory.total}
       >
-        <Card className="border-accent/30 bg-card/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database size={24} className="text-accent" weight="duotone" />
+        <Card className="border-accent/30 bg-card/50 backdrop-blur-sm glow-accent">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Database size={20} className="text-accent sm:w-6 sm:h-6" weight="duotone" />
               Memory Requirements
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Model Weights</span>
+          <CardContent className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between text-sm sm:text-base">
+                <span className="text-muted-foreground">Model Weights</span>
                 <span className="font-mono font-medium">{formatMemory(memory.modelWeights)}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">KV Cache</span>
+              <div className="flex items-center justify-between text-sm sm:text-base">
+                <span className="text-muted-foreground">KV Cache</span>
                 <span className="font-mono font-medium">{formatMemory(memory.kvCache || 0)}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Overhead</span>
+              <div className="flex items-center justify-between text-sm sm:text-base">
+                <span className="text-muted-foreground">Overhead</span>
                 <span className="font-mono font-medium">{formatMemory(memory.overhead)}</span>
               </div>
               <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">Total VRAM Required</span>
-                <span className="font-mono text-2xl font-bold text-accent">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-base sm:text-lg font-semibold">Total VRAM Required</span>
+                <span className="font-mono text-xl sm:text-2xl font-bold text-accent">
                   {formatMemory(memory.total)}
                 </span>
               </div>
@@ -192,20 +195,20 @@ export function InferenceCalculator() {
               <>
                 <Separator />
                 <div className="space-y-3">
-                  <h4 className="font-semibold">Recommended GPUs</h4>
+                  <h4 className="font-semibold text-sm sm:text-base">Recommended GPUs</h4>
                   <div className="space-y-2">
                     {recommendedGPUs.map((gpu) => (
                       <div
                         key={gpu.name}
-                        className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50"
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg bg-secondary/30 border border-border/50"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{gpu.name}</span>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <span className="font-medium text-sm sm:text-base">{gpu.name}</span>
                           <Badge variant="outline" className="font-mono text-xs">
                             {gpu.vram} GB
                           </Badge>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs self-start sm:self-center">
                           {gpu.tier}
                         </Badge>
                       </div>
@@ -213,7 +216,7 @@ export function InferenceCalculator() {
                   </div>
                   {recommendedGPUs.length > 0 && (
                     <div className="space-y-2 pt-2">
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
                         <span className="text-muted-foreground">Memory Usage</span>
                         <span className="font-mono">
                           {((memory.total / recommendedGPUs[0].vram) * 100).toFixed(1)}%
@@ -227,8 +230,8 @@ export function InferenceCalculator() {
             )}
 
             {recommendedGPUs.length === 0 && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-center">
-                <p className="text-sm text-destructive">
+              <div className="p-3 sm:p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-center">
+                <p className="text-xs sm:text-sm text-destructive">
                   This model requires more VRAM than common GPUs. Consider using quantization or model
                   sharding.
                 </p>
