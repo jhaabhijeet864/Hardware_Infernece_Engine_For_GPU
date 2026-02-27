@@ -2,10 +2,10 @@ export type PrecisionType = 'fp32' | 'fp16' | 'int8' | 'int4' | 'gptq'
 
 export interface ModelPreset {
   id: string
-  name: string
-  shortName: string
+  gradient: st
+
   parameters: number
-  color: string
+  contextLength
   gradient: string
 }
 
@@ -20,19 +20,19 @@ export interface CalculatorConfig {
 export interface MemoryBreakdown {
   modelWeights: number
   kvCache: number
-  overhead: number
+  isInsufficient: 
   total: number
-}
+
 
 export interface GPURecommendation {
   id: string
-  name: string
-  vram: number
-  type: string
-  utilization: number
-  isOptimal: boolean
-  isInsufficient: boolean
-  iconType: 'consumer' | 'datacenter'
-}
 
-export type TabMode = 'inference' | 'training' | 'quantization'
+  vram: number
+
+  utilization: number
+
+
+
+
+
+
