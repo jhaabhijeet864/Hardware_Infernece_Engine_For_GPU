@@ -53,7 +53,7 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+            <Label htmlFor="parameters" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
               Parameters (Billion)
             </Label>
             <div className="relative">
@@ -72,14 +72,14 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
                 }}
                 className="w-full bg-surface-highlight border-border rounded-lg py-2.5 px-3 text-white font-mono focus:border-primary focus:ring-1 focus:ring-primary transition-all pr-8"
               />
-              <span className="absolute right-3 top-2.5 text-muted-foreground font-mono text-sm pointer-events-none">
+              <span className="absolute right-3 top-2.5 text-muted-foreground font-mono text-sm pointer-events-none" aria-hidden="true">
                 B
               </span>
             </div>
           </div>
           
           <div>
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+            <Label htmlFor="precision-select" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
               Precision (Weights)
             </Label>
             <Select
@@ -88,7 +88,7 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
                 onChange((prev) => ({ ...prev, precision: value as PrecisionType }))
               }}
             >
-              <SelectTrigger className="w-full bg-surface-highlight border-border rounded-lg py-2.5 px-3 text-white font-mono focus:border-primary focus:ring-1 focus:ring-primary">
+              <SelectTrigger id="precision-select" className="w-full bg-surface-highlight border-border rounded-lg py-2.5 px-3 text-white font-mono focus:border-primary focus:ring-1 focus:ring-primary">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -104,10 +104,10 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
 
         <div>
           <div className="flex justify-between items-center mb-2">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <Label htmlFor="context-length-slider" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Context Length
             </Label>
-            <span className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded text-sm">
+            <span className="text-primary font-mono font-bold bg-primary/10 px-2 py-0.5 rounded text-sm" aria-hidden="true">
               {config.contextLength.toLocaleString()}
             </span>
           </div>
@@ -122,7 +122,7 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
               step={1}
               className="w-full"
             />
-            <div className="absolute w-full flex justify-between text-[10px] text-muted-foreground font-mono mt-2">
+            <div className="absolute w-full flex justify-between text-[10px] text-muted-foreground font-mono mt-2" aria-hidden="true">
               <span>512</span>
               <span>2k</span>
               <span>4k</span>
@@ -138,10 +138,11 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border">
           <div className="flex items-center justify-between p-3 rounded-lg bg-surface-highlight/50 border border-transparent hover:border-border transition-colors">
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground">KV Cache Quantization</span>
+              <Label htmlFor="kv-cache-switch" className="text-sm font-medium text-foreground cursor-pointer">KV Cache Quantization</Label>
               <span className="text-[10px] text-muted-foreground">Reduce memory for long context</span>
             </div>
             <Switch
+              id="kv-cache-switch"
               checked={config.kvCacheQuantization}
               onCheckedChange={(checked) => {
                 onChange((prev) => ({ ...prev, kvCacheQuantization: checked }))
@@ -151,10 +152,11 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
           
           <div className="flex items-center justify-between p-3 rounded-lg bg-surface-highlight/50 border border-transparent hover:border-border transition-colors">
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-foreground">Flash Attention 2</span>
+              <Label htmlFor="flash-attention-switch" className="text-sm font-medium text-foreground cursor-pointer">Flash Attention 2</Label>
               <span className="text-[10px] text-muted-foreground">Optimize memory overhead</span>
             </div>
             <Switch
+              id="flash-attention-switch"
               checked={config.flashAttention}
               onCheckedChange={(checked) => {
                 onChange((prev) => ({ ...prev, flashAttention: checked }))
