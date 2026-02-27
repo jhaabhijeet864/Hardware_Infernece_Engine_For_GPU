@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { VideoCamera, Server, Warning, FunnelSimple } from '@phosphor-icons/react'
+import { VideoCamera, Desktop, Warning, FunnelSimple } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { GPU_DATABASE } from '@/lib/constants'
 import { calculateUtilization } from '@/lib/calculator'
@@ -75,7 +75,7 @@ export function GPURecommendations({ requiredVRAM }: GPURecommendationsProps) {
                   {gpu.isInsufficient ? (
                     <Warning size={18} weight="duotone" />
                   ) : gpu.iconType === 'datacenter' ? (
-                    <Server size={18} weight="duotone" />
+                    <Desktop size={18} weight="duotone" />
                   ) : (
                     <VideoCamera size={18} weight="duotone" />
                   )}

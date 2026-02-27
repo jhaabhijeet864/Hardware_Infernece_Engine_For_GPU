@@ -41,11 +41,11 @@ This is an interactive calculator tool with preset management, configuration opt
 - Success criteria: GPUs sorted by utilization efficiency; color-coding distinguishes optimal/viable/insufficient options; utilization bars accurately reflect capacity
 
 **Multi-Mode Tabs**
-- Functionality: Switch between Inference, Training, and Quantization calculation modes
-- Purpose: Support different LLM deployment scenarios with mode-specific calculations
+- Functionality: Switch between Inference, Training, and Quantization calculation modes with distinct calculator interfaces for each
+- Purpose: Support different LLM deployment scenarios with mode-specific calculations and configurations
 - Trigger: User clicks tab in navigation
-- Progression: User clicks tab → Active state updates → Configuration panel adapts → Calculation formula adjusts
-- Success criteria: Active tab visually distinct with glow effect; configurations persist per tab; formulas correct per mode
+- Progression: User clicks tab → Active state updates → Tab content switches with animation → Appropriate calculator displays (Inference: VRAM calc with GPU recommendations, Training: training memory calc with optimizer/batch size settings, Quantization: side-by-side precision comparison)
+- Success criteria: Active tab visually distinct with glow effect; each tab shows appropriate calculator UI; smooth transitions between tabs; tab selection persists in state
 
 ## Edge Case Handling
 

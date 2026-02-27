@@ -5,6 +5,8 @@ import { ModelPresetSelector } from '@/components/ModelPresetSelector'
 import { ConfigurationPanel } from '@/components/ConfigurationPanel'
 import { ResultsDisplay } from '@/components/ResultsDisplay'
 import { GPURecommendations } from '@/components/GPURecommendations'
+import { TrainingCalculator } from '@/components/TrainingCalculator'
+import { QuantizationComparison } from '@/components/QuantizationComparison'
 import { Header } from '@/components/Header'
 import { Cpu, Lightning, ChartBar } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
@@ -25,8 +27,13 @@ function App() {
   })
 
   const memoryBreakdown = useMemo(() => {
+    if (!config) return { modelWeights: 0, kvCache: 0, overhead: 0, total: 0 }
     return calculateMemoryRequirements(config)
   }, [config])
+
+  if (!activeTab || !selectedPresetId || !config) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-background grid-pattern flex flex-col">
@@ -98,32 +105,63 @@ function App() {
           </button>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            <ModelPresetSelector
-              selectedId={selectedPresetId}
-              onSelect={(preset) => {
-                setSelectedPresetId(preset.id)
-                setConfig((prev) => ({ ...prev, parameters: preset.parameters }))
-              }}
-            />
-            
-            <ConfigurationPanel
-              config={config}
-              onChange={setConfig}
-            />
-          </div>
+        {activeTab === 'inference' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 flex flex-col gap-6">
+              <ModelPresetSelector
+                selectedId={selectedPresetId}
+                onSelect={(preset) => {
+                  setSelectedPresetId(preset.id)
+                  setConfig((prev) => ({
+                    parameters: preset.parameters,
+                    precision: prev?.precision || 'fp16',
+                    contextLength: prev?.contextLength || 8192,
+                    kvCacheQuantization: prev?.kvCacheQuantization || false,
+                    flashAttention: prev?.flashAttention || true,
+                  }))
+                }}
+              />
+              
+              <ConfigurationPanel
+                config={config}
+                onChange={(updateFn) => {
+                  const result = updateFn(config)
+                  setConfig(result)
+                }}
+              />
+            </div>
 
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            <ResultsDisplay
-              memoryBreakdown={memoryBreakdown}
-            />
-            
-            <GPURecommendations
-              requiredVRAM={memoryBreakdown.total}
-            />
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              <ResultsDisplay
+                memoryBreakdown={memoryBreakdown}
+              />
+              
+              <GPURecommendations
+                requiredVRAM={memoryBreakdown.total}
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {activeTab === 'training' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <TrainingCalculator />
+          </motion.div>
+        )}
+
+        {activeTab === 'quantization' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <QuantizationComparison />
+          </motion.div>
+        )}
 
         <footer className="mt-8 pt-6 border-t border-border/50">
           <p className="text-center text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
