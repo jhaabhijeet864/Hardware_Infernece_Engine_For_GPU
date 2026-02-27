@@ -1,286 +1,146 @@
-# LLM Hardware Calculator - Product Requirements Document
+# Planning Guide
 
-A professional-grade calculator for estimating VRAM and RAM requirements for running and training Large Language Models with hardware recommendations.
+A specialized web application for calculating VRAM and memory requirements for running and training Large Language Models, with intelligent GPU recommendations.
 
 **Experience Qualities**:
-1. **Technical Confidence** - Users should feel empowered with accurate, actionable information presented clearly
-2. **Visual Sophistication** - A refined, modern interface that stands out from typical calculator tools with bold design choices
-3. **Seamless Adaptability** - Effortless transitions between desktop and mobile with no compromise in functionality
+1. **Technical Precision** - Users should feel confident in the accuracy of memory calculations and hardware recommendations, with detailed breakdowns that educate as they inform
+2. **Futuristic Sophistication** - The interface should evoke cutting-edge AI technology through bold purple/cyan colorways, glowing effects, and refined glassmorphic panels
+3. **Effortless Clarity** - Complex hardware specifications should be instantly understandable through visual hierarchies, progress bars, and color-coded indicators
 
 **Complexity Level**: Light Application (multiple features with basic state)
-This is a multi-view calculator with three distinct modes (Inference, Training, Quantization), persistent user preferences, and dynamic calculations with visual feedback. The complexity fits a professional tool that requires no backend infrastructure but provides substantial value through client-side computation and intelligent presentation.
+This is an interactive calculator tool with preset management, configuration options, and real-time computation. State management is straightforward with configuration inputs and calculation outputs.
 
 ## Essential Features
 
-### Feature 1: Inference Memory Calculator
-- **Functionality**: Calculate VRAM requirements for running LLM inference based on model size, precision, and context length
-- **Purpose**: Help users determine if they can run a specific model on their hardware before downloading/purchasing
-- **Trigger**: User selects "Inference" tab or loads the app (default view)
-- **Progression**: Select model preset or enter custom parameters → Adjust precision and context length → View memory breakdown → Review GPU recommendations
-- **Success criteria**: Memory calculations update in real-time with smooth animations, GPU recommendations show utilization percentage, results persist across sessions
+**Model Preset Selection**
+- Functionality: Quick-select popular LLM architectures (Llama 3, Mistral, Gemma, Phi-3) with pre-configured parameters
+- Purpose: Eliminate manual parameter lookup and provide instant starting points for common models
+- Trigger: User clicks on a model preset card
+- Progression: User views preset cards → Clicks desired model → Configuration auto-populates → Results update instantly
+- Success criteria: Parameters correctly load for each preset; custom model option allows manual override
 
-### Feature 2: Training Memory Calculator
-- **Functionality**: Calculate VRAM requirements for training/fine-tuning with configurable batch size, optimizer, and training method (Full/LoRA/QLoRA)
-- **Purpose**: Enable users to plan training infrastructure and optimize hyperparameters for available hardware
-- **Trigger**: User selects "Training" tab
-- **Progression**: Choose training method (Full/LoRA/QLoRA) → Select model and precision → Configure batch size and gradient accumulation → View comprehensive memory breakdown → Review GPU recommendations
-- **Success criteria**: Training method selection clearly explains memory implications, calculations account for optimizer states and activations, recommendations warn when VRAM is insufficient
+**VRAM Calculation Engine**
+- Functionality: Real-time computation of memory requirements based on model parameters, precision, context length, and optimizations
+- Purpose: Give developers accurate hardware requirements before deployment
+- Trigger: Any change to configuration inputs (parameters, precision, context length, toggles)
+- Progression: User adjusts input → Calculation runs → Results display with breakdown (weights, KV cache, overhead)
+- Success criteria: Calculations match industry-standard formulas; breakdown shows component contributions; updates within 100ms
 
-### Feature 3: Quantization Comparison
-- **Functionality**: Side-by-side comparison of memory usage, quality retention, and speed across FP32/FP16/INT8/INT4 quantization
-- **Purpose**: Help users make informed decisions about quantization trade-offs for their use case
-- **Trigger**: User selects "Quantization" tab
-- **Progression**: Select model → View comparative cards for each quantization level → Analyze memory savings vs quality retention → Read quantization guide
-- **Success criteria**: Visual progress bars clearly show trade-offs, comparative metrics update instantly, educational guidance helps users choose appropriate quantization
+**Interactive Configuration**
+- Functionality: Fine-tune calculation inputs including parameter count, precision format, context length slider, and optimization toggles
+- Purpose: Accommodate various deployment scenarios and hardware optimization strategies
+- Trigger: User modifies any input field or toggle
+- Progression: User enters/selects value → Input validates → Calculation updates → Results refresh with animation
+- Success criteria: All inputs constrained to valid ranges; context slider shows tick marks; toggles affect calculations appropriately
 
-### Feature 4: Persistent User Preferences
-- **Functionality**: Automatically save and restore user's last used settings across all calculators
-- **Purpose**: Provide a seamless experience for users who repeatedly check similar configurations
-- **Trigger**: User modifies any parameter
-- **Progression**: User changes parameter → System saves to KV store → User closes and reopens app → Settings restore automatically
-- **Success criteria**: All parameters (model size, precision, batch size, etc.) persist, restoration is instant with no loading flicker
+**GPU Recommendations**
+- Functionality: Display ranked list of GPUs with compatibility indicators, utilization percentages, and visual progress bars
+- Purpose: Guide hardware purchasing/rental decisions with clear fit indicators
+- Trigger: Calculation completes with new VRAM requirement
+- Progression: VRAM calculated → GPUs ranked by suitability → Best match highlighted → Insufficient GPUs flagged
+- Success criteria: GPUs sorted by utilization efficiency; color-coding distinguishes optimal/viable/insufficient options; utilization bars accurately reflect capacity
 
-### Feature 5: Mobile-First Responsive Design
-- **Functionality**: Fully functional and aesthetically pleasing interface on screens from 320px to 4K displays
-- **Purpose**: Make the tool accessible to users on any device without compromising usability
-- **Trigger**: User accesses app on any device
-- **Progression**: App loads → Layout adapts to viewport → Touch targets are appropriately sized → Text remains readable → Features remain fully accessible
-- **Success criteria**: All calculators work on mobile, cards stack gracefully, form inputs are easy to tap, sliders function with touch, tabs are thumb-friendly
+**Multi-Mode Tabs**
+- Functionality: Switch between Inference, Training, and Quantization calculation modes
+- Purpose: Support different LLM deployment scenarios with mode-specific calculations
+- Trigger: User clicks tab in navigation
+- Progression: User clicks tab → Active state updates → Configuration panel adapts → Calculation formula adjusts
+- Success criteria: Active tab visually distinct with glow effect; configurations persist per tab; formulas correct per mode
 
 ## Edge Case Handling
 
-- **Extreme Model Sizes**: When users enter unrealistic values (>1000B or <0.1B parameters), display warning message but still calculate to maintain exploration freedom
-- **Insufficient VRAM**: When no consumer GPUs can handle the configuration, show clear warning with suggestions (reduce batch size, use quantization, try LoRA/QLoRA)
-- **Rapid Parameter Changes**: Debounce calculations to prevent excessive re-renders and animations when users rapidly adjust sliders
-- **Empty/Invalid Inputs**: Validate numeric inputs and default to reasonable values (7B for model size, fp16 for precision) when invalid
-- **Mobile Orientation Changes**: Preserve state and scroll position when user rotates device between portrait and landscape
+- **Oversized Context Windows**: Display warning when context length exceeds typical GPU memory capabilities, suggest quantization or optimization strategies
+- **Invalid Parameter Combinations**: Validate that precision + parameters + context fit within physical hardware limits; show helpful error states
+- **Extreme Parameter Values**: Constrain inputs to realistic ranges (0.1B-1000B parameters, 512-128k context); prevent calculation errors
+- **Insufficient GPU Memory**: Clearly flag GPUs that cannot accommodate the model; suggest multi-GPU setups or quantization
+- **Zero/Negative Inputs**: Prevent invalid numeric inputs; enforce minimum values; show validation feedback
 
 ## Design Direction
 
-The design should evoke **technical mastery and precision** - like a tool built by engineers for engineers, but with artistic refinement. Think of high-end dev tools like Vercel's dashboard or Linear's interface: dark, sophisticated, with pops of vibrant accent colors. The interface should feel like a specialized instrument - trustworthy, precise, and beautiful. Subtle gradients, soft glows on interactive elements, and confident typography should create a sense of premium quality.
+The design should evoke the feeling of professional AI infrastructure tooling—sleek, precise, and futuristic. Users should feel like they're working with cutting-edge technology through the bold purple-cyan gradient accents, glowing numerical displays, and sophisticated glassmorphic panels that suggest transparency and clarity in computation.
 
 ## Color Selection
 
-The design uses a **deep purple and cyan tech aesthetic** with sophisticated neutrals and electric accents.
+A dark cyberpunk aesthetic with vibrant purple primary and cyan accent, creating high contrast against deep backgrounds for technical precision.
 
-- **Primary Color**: `oklch(0.60 0.25 280)` - Deep vibrant purple, communicates innovation and technical sophistication, used for primary actions and key metrics
+- **Primary Color**: oklch(0.59 0.24 305) - Vibrant purple (#b642f0) for active states, borders, and brand identity; communicates innovation and AI technology
 - **Secondary Colors**: 
-  - Background: `oklch(0.10 0.02 280)` - Almost black with subtle purple tint, creates depth
-  - Surface/Card: `oklch(0.14 0.03 280)` - Elevated dark surface with purple undertone
-- **Accent Color**: `oklch(0.70 0.18 195)` - Electric cyan, demands attention for calculations results and interactive states, creates tech-forward vibe
-- **Foreground/Background Pairings**: 
-  - Primary (Deep Purple #8B5CF6): White text (#FFFFFF) - Ratio 5.2:1 ✓
-  - Accent (Electric Cyan #3DD4D9): Dark surface (#1A1625) - Ratio 8.9:1 ✓
-  - Card (Dark Purple #232035): Light gray text (#E5E5E5) - Ratio 11.4:1 ✓
-  - Background (Near Black #181420): Off-white text (#F5F5F5) - Ratio 15.8:1 ✓
+  - Background Dark: oklch(0.12 0.03 305) - Deep purple-black for main background
+  - Surface Dark: oklch(0.16 0.04 305) - Card/panel backgrounds with slight lift
+  - Surface Highlight: oklch(0.20 0.05 305) - Hover states and input fields
+- **Accent Color**: oklch(0.73 0.14 195) - Cyan (#22d3ee) for result highlights, success states, and visual emphasis; provides energetic contrast
+- **Foreground/Background Pairings**:
+  - Background Dark (oklch(0.12 0.03 305)): White text (oklch(0.96 0 0)) - Ratio 13.2:1 ✓
+  - Surface Dark (oklch(0.16 0.04 305)): Slate 200 (oklch(0.85 0.01 280)) - Ratio 9.8:1 ✓
+  - Primary Purple (oklch(0.59 0.24 305)): White text (oklch(1.0 0 0)) - Ratio 5.1:1 ✓
+  - Accent Cyan (oklch(0.73 0.14 195)): Background Dark (oklch(0.12 0.03 305)) - Ratio 8.4:1 ✓
 
 ## Font Selection
 
-Typography should feel **technical yet refined** - monospace for precision, sans-serif for elegance. The combination conveys both engineering rigor and modern design sensibility.
+Typography should convey technical sophistication with a blend of geometric display fonts for headings and monospace for numerical precision.
 
-- **Primary Font**: Space Grotesk - Geometric sans-serif with technical character but approachable warmth
-- **Secondary Font**: JetBrains Mono - For all numeric displays, calculations, and data values to emphasize precision
-- **Accent Font**: Bricolage Grotesque - For hero headings to add distinctive character
-
-**Typographic Hierarchy**:
-- H1 (Page Title): Bricolage Grotesque Bold/36px/tight tracking (-0.02em)
-- H2 (Section Titles): Space Grotesk Bold/24px/normal tracking
-- H3 (Card Titles): Space Grotesk Semibold/18px/normal tracking  
-- Body Text: Space Grotesk Regular/16px/line-height 1.6
-- Numeric Values: JetBrains Mono Medium/varies/tabular-nums for alignment
-- Labels: Space Grotesk Medium/14px/slight spacing (0.01em)
-- Captions: Space Grotesk Regular/13px/muted color
+- **Typographic Hierarchy**:
+  - H1 (App Title): Space Grotesk Bold/20px/tight tracking - Modern geometric sans for brand presence
+  - H2 (Section Headers): Space Grotesk Bold/18px/normal tracking - Consistent hierarchy
+  - Body Text: Space Grotesk Regular/14px/relaxed leading - Clean readability
+  - Numerical Data: JetBrains Mono Bold/14-60px/tabular nums - Technical precision for metrics
+  - Labels: Space Grotesk Semibold/11px/wide tracking uppercase - Clear input labeling
+  - Micro Text: JetBrains Mono Regular/10px - Technical metadata and badges
 
 ## Animations
 
-Animations should feel **physics-based and purposeful** - never gratuitous. Use subtle spring animations for state changes, smooth easing for value updates, and gentle glows for focus states. Key moments: (1) Results cards slide in with staggered timing when calculations update, (2) Tab transitions with smooth fade and slight vertical motion, (3) GPU recommendation cards pulse subtly when first appearing, (4) Progress bars fill with smooth elastic easing, (5) Hover states on buttons show soft glow expansion.
+Animations should reinforce computational feedback—subtle pulsing on calculation results, smooth number transitions for live updates, and glowing effects that suggest energy and processing power.
+
+- Result value changes animate with spring physics (framer-motion) to feel responsive
+- Tab switching includes smooth underline slide and background fade transitions
+- GPU recommendation cards use staggered entrance animations (50ms delay each)
+- Calculation result pulses with cyan glow on update to draw attention
+- Slider thumb glows with box-shadow on interaction
+- Toggle switches animate with smooth translate transform (0.2s ease)
+- Preset cards scale subtly (1.05x) on hover with border glow intensification
 
 ## Component Selection
 
 - **Components**: 
-  - Tabs (shadcn) - For switching between Inference/Training/Quantization modes, styled with accent gradient on active state
-  - Card (shadcn) - For all major content sections, with border-accent glow on result cards
-  - Input (shadcn) - For numeric parameter entry, with focus ring in accent color
-  - Slider (shadcn) - For context length and gradient accumulation, styled with accent thumb and track
-  - Select (shadcn) - For precision and optimizer selection, with custom dropdown styling
-  - Badge (shadcn) - For GPU tiers and recommended tags, using outline variant with accent border
-  - Progress (shadcn) - For memory utilization visualization, with gradient fills
-  - Tooltip (shadcn) - For parameter explanations, dark background with light text
-  - Separator (shadcn) - For visual hierarchy in result breakdowns
+  - Tabs (navigation modes) - Shadcn Tabs with custom styling for active state glow and bottom border indicator
+  - Card - Shadcn Card as base for all panels with glassmorphic backdrop-blur modifications
+  - Slider - Shadcn Slider for context length with custom track/thumb styling to match purple theme
+  - Switch - Shadcn Switch for optimization toggles (KV Cache, Flash Attention) with purple checked state
+  - Select - Shadcn Select for precision dropdown with custom Material Symbols chevron icon
+  - Input - Shadcn Input for parameter fields with monospace font and unit suffixes
+  - Button - Shadcn Button for presets and actions with gradient backgrounds and glow effects
+  - Avatar - Shadcn Avatar for user profile in header
   
-- **Customizations**: 
-  - Custom preset button component with selected state showing accent gradient background and subtle shadow
-  - Enhanced result cards with animated entry and soft backdrop blur effect
-  - GPU recommendation cards with hover state showing additional details
-  - Custom slider marks for common values with labels
-
-- **States**: 
-  - Buttons: Default (subtle border), Hover (accent border glow), Active (accent background with scale), Disabled (50% opacity)
-  - Inputs: Default (muted border), Focus (accent ring with glow), Error (red ring), Filled (slightly brighter background)
-  - Cards: Default (subtle border), Results (accent border with glow), Warning (destructive border)
-
+- **Customizations**:
+  - Glassmorphic panels: bg-[surface-dark]/70 backdrop-blur-md with border-primary/10
+  - Gradient borders: Use wrapper div with gradient background and inner content card
+  - Result display: Custom component with giant glowing numbers using text-shadow and drop-shadow
+  - GPU cards: Custom component with progress bars, badges, and utilization metrics
+  - Material Symbols: Use Phosphor Icons as alternative (Memory, Tune, ChartBar, Warning, etc.)
+  
+- **States**:
+  - Buttons: Default (border-primary bg-primary/10), Hover (bg-primary/20 scale-105), Active (border-primary/50 with glow), Selected (gradient background with checkmark badge)
+  - Inputs: Default (border-surface-highlight), Focus (border-primary ring-primary glow), Error (border-red-500/30), Disabled (opacity-50)
+  - Toggles: Unchecked (bg-surface-highlight), Checked (bg-primary with shadow glow), Hover (brightness increase)
+  
 - **Icon Selection**: 
-  - Phosphor Icons (duotone weight) throughout for consistency
-  - GraphicsCard icon for Inference tab and GPU sections
-  - Lightning icon for Training tab
-  - ChartBar icon for Quantization tab
-  - Database icon for memory requirement results
-  - Info icon for tooltips (regular weight, muted color)
-  - Cpu icon for processor-related elements
-
+  - Header logo: Cpu (Phosphor) for memory/compute theme
+  - Model preset cards: Letter badges with gradient backgrounds (no icons needed)
+  - Configuration: SlidersHorizontal for tune, Code for model presets
+  - GPUs: Video Card icon, Server for datacenter GPUs, Warning for insufficient
+  - Nav tabs: GraphicsCard, Lightning, ChartBar icons
+  
 - **Spacing**: 
-  - Page padding: 8 (2rem on desktop), 4 (1rem on mobile)
-  - Card gap: 6 (1.5rem)
-  - Form element gap: 4 (1rem)
-  - Section gap within cards: 6 (1.5rem)
-  - Label to input: 2 (0.5rem)
-  - Inline element gap: 2-3 (0.5-0.75rem)
-
-- **Mobile**:
-  - Stack all grid layouts to single column below 768px
-  - Tabs use full width with icons above text on mobile
-  - Preset buttons arrange in scrollable horizontal row on small screens with snap points
-  - Form inputs expand to full width
-  - GPU recommendation cards remain full width with padding adjustment
-  - Sliders get larger touch targets (min 44px height)
-  - Footer text reduces to 12px
-  - Reduce heading sizes by 20-30% on mobile
-  - Card padding reduces from 6 to 4 on mobile
-
-## Production System Design Architecture
-
-### Architecture Overview
-```
-┌─────────────────────────────────────────────────────────────┐
-│                         Client Tier                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │ React + Vite │  │ State (KV)   │  │ Calculations │      │
-│  │  Components  │◄─┤  Management  │◄─┤    Engine    │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Spark Runtime Layer                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  KV Storage  │  │  LLM API     │  │  User Info   │      │
-│  │   (persist)  │  │  (optional)  │  │   Service    │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Core Components
-
-**1. Calculation Engine (`/lib/llm-calculations.ts`)**
-- Pure functions for all memory calculations (no side effects)
-- Comprehensive type definitions for parameters and results
-- Unit-testable calculation logic
-- Extensible for future model architectures (MoE, MQA, GQA)
-
-**2. State Management**
-- Use `useKV` hook for persistent user preferences
-- Separate KV keys for each calculator's settings:
-  - `inference-params` - Last used inference configuration
-  - `training-params` - Last used training configuration  
-  - `quantization-model` - Last selected model for comparison
-  - `user-favorites` - Saved model configurations (future)
-- React state for ephemeral UI (loading, animations, transient values)
-
-**3. Component Architecture**
-```
-App.tsx (orchestrator)
-├── Header (branding, navigation)
-├── TabNavigation (mode switcher)
-├── InferenceCalculator (container)
-│   ├── ModelPresets (selection)
-│   ├── ParameterForm (inputs)
-│   └── ResultsDisplay (breakdown + GPUs)
-├── TrainingCalculator (container)
-│   ├── TrainingMethodSelector
-│   ├── ConfigurationForm
-│   └── TrainingResults
-├── QuantizationComparison (container)
-│   ├── ModelSelector
-│   └── ComparisonGrid
-└── Footer (disclaimers, attribution)
-```
-
-**4. Performance Optimizations**
-- Memoize calculation results with `useMemo` to prevent redundant computation
-- Debounce slider inputs to reduce calculation frequency during rapid changes
-- Lazy load heavy components (charts, if added) with `React.lazy`
-- Use `React.memo` for pure presentational components (preset buttons, result cards)
-- Virtual scrolling for long GPU lists (if expanded to 50+ options)
-
-**5. Data Validation & Error Handling**
-- Zod schemas for all parameter types
-- Graceful fallbacks for invalid calculations
-- Error boundary around each calculator to prevent full app crashes
-- User-friendly error messages ("This configuration requires..." not "Error: NaN")
-
-**6. Accessibility**
-- Semantic HTML throughout (`<main>`, `<section>`, `<article>`)
-- ARIA labels on all interactive elements
-- Keyboard navigation for tabs (arrow keys), sliders (arrow keys), presets
-- Focus management when switching tabs
-- Color contrast meets WCAG AA standards
-- Screen reader announcements for calculation updates
-
-**7. Analytics & Monitoring (Future)**
-- Track calculator usage patterns (which modes are popular)
-- Monitor calculation parameters to improve presets
-- Error tracking with Sentry integration
-- Performance monitoring with Web Vitals
-
-**8. Implemented Enhancements**
-- **Export/Share**: Generate shareable URLs with encoded parameters ✓
-- **Comparison Mode**: Side-by-side comparison of two configurations ✓
-- **Cost Estimation**: GPU rental costs from cloud providers ✓
-- **Historical Data**: Track and visualize user's calculation history ✓
-
-**9. Future Enhancements**
-- **Saved Configurations**: Allow users to save and name specific setups
-- **Multi-GPU Calculator**: Estimate for tensor parallel setups
-- **Advanced Models**: Support for MoE routing calculations, GQA attention
-- **Community Presets**: Share configurations with other users
-- **API Mode**: Expose calculations as REST API for integration
-
-### Deployment Strategy
-
-**Development Environment**
-- Vite dev server with HMR for rapid iteration
-- Type checking with TypeScript strict mode
-- Linting with ESLint
-- Format with Prettier
-
-**Production Build**
-- Vite production build with tree-shaking
-- Asset optimization (image compression, code splitting)
-- Service worker for offline capability (future)
-- CDN distribution for static assets
-
-**Testing Strategy**
-- Unit tests for calculation functions (vitest)
-- Component tests for user interactions (Testing Library)
-- E2E tests for critical flows (Playwright)
-- Visual regression tests (Chromatic/Percy)
-
-**Monitoring & Maintenance**
-- Error tracking and reporting
-- Performance monitoring
-- Usage analytics
-- Regular updates to model presets and GPU database
-
-### Security Considerations
-- All calculations client-side (no sensitive data transmission)
-- Input sanitization for numeric values
-- No external API calls required (except optional LLM features)
-- CSP headers to prevent XSS
-- Dependency vulnerability scanning
-
-### Scalability Considerations
-- Stateless client app scales horizontally
-- KV storage handles user preferences efficiently
-- No database bottlenecks (client-side calculations)
-- Can handle GPU database growth to 100+ options
-- Model preset expansion supported
+  - Section gaps: gap-6 (24px) between major sections
+  - Card padding: p-6 (24px) for comfortable breathing room
+  - Input groups: gap-4 (16px) for form field spacing
+  - Inline elements: gap-2 (8px) for icon-text pairs
+  - Tight groups: gap-1 (4px) for badges and chips
+  
+- **Mobile**: 
+  - Header: Stack title and user profile vertically on small screens; collapse settings to icon-only buttons
+  - Tabs: Grid 3 columns on mobile with icon+text stacked vertically; scroll horizontally if needed
+  - Two-column layout: Stack to single column on <lg breakpoint
+  - GPU cards: Maintain full width; increase touch targets to 44px minimum
+  - Sliders: Expand to full width; show value badge prominently above slider
+  - Number inputs: Full width on mobile with larger touch targets
