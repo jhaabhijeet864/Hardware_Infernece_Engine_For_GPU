@@ -31,7 +31,7 @@ export interface GPURecommendation {
   name: string
   vram: number
   type: string
-  iconType: 'consumer' | 'datacenter'
+  iconType: 'consumer' | 'datacenter' | 'unified'
   utilization: number
   isOptimal: boolean
   isInsufficient: boolean

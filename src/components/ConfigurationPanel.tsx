@@ -1,11 +1,16 @@
 import { SlidersHorizontal, CaretDown } from '@phosphor-icons/react'
+import { TriangleAlert } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { PRECISION_OPTIONS, CONTEXT_LENGTH_OPTIONS } from '@/lib/constants'
 import type { CalculatorConfig, PrecisionType } from '@/lib/types'
+
+const MAX_PARAMETERS = 1000
+const MAX_CONTEXT = 131072
 
 interface ConfigurationPanelProps {
   config: CalculatorConfig
@@ -14,6 +19,9 @@ interface ConfigurationPanelProps {
 
 export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps) {
   const contextIndex = CONTEXT_LENGTH_OPTIONS.findIndex((v) => v === config.contextLength)
+  const safeContextIndex = contextIndex === -1 ? CONTEXT_LENGTH_OPTIONS.findIndex((v) => v >= config.contextLength) || 0 : contextIndex
+  const showParamWarning = config.parameters > MAX_PARAMETERS
+  const showContextWarning = config.contextLength >= MAX_CONTEXT
   
   return (
     <section className="glass-panel p-6 rounded-2xl flex-1">
@@ -23,6 +31,26 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
       </h2>
       
       <div className="space-y-6">
+        {showParamWarning && (
+          <Alert className="border-[oklch(0.73_0.14_195)] bg-[oklch(0.73_0.14_195)]/10 text-[oklch(0.73_0.14_195)]">
+            <TriangleAlert className="size-4" />
+            <AlertTitle>Extreme Parameter Count</AlertTitle>
+            <AlertDescription className="text-[oklch(0.73_0.14_195)]/80">
+              Models above {MAX_PARAMETERS}B parameters are rare research systems. Calculations may reflect impractical hardware requirements.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {showContextWarning && (
+          <Alert className="border-[oklch(0.59_0.24_305)] bg-[oklch(0.59_0.24_305)]/10 text-[oklch(0.59_0.24_305)]">
+            <TriangleAlert className="size-4" />
+            <AlertTitle>Maximum Context Length</AlertTitle>
+            <AlertDescription className="text-[oklch(0.59_0.24_305)]/80">
+              128k context requires significant VRAM. Consider enabling KV Cache Quantization and Flash Attention 2 to reduce memory usage.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="parameters" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
@@ -38,7 +66,7 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
                 value={config.parameters}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value)
-                  if (!isNaN(value)) {
+                  if (!isNaN(value) && value > 0) {
                     onChange((prev) => ({ ...prev, parameters: value }))
                   }
                 }}
@@ -85,13 +113,7 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
           </div>
           <div className="relative pt-1 pb-6">
             <Slider
-              id="context-length-slider"
-              aria-label={`Context length: ${config.contextLength.toLocaleString()} tokens`}
-              aria-valuemin={CONTEXT_LENGTH_OPTIONS[0]}
-              aria-valuemax={CONTEXT_LENGTH_OPTIONS[CONTEXT_LENGTH_OPTIONS.length - 1]}
-              aria-valuenow={config.contextLength}
-              aria-valuetext={`${config.contextLength.toLocaleString()} tokens`}
-              value={[contextIndex]}
+              value={[safeContextIndex]}
               onValueChange={([index]) => {
                 onChange((prev) => ({ ...prev, contextLength: CONTEXT_LENGTH_OPTIONS[index] }))
               }}
@@ -107,6 +129,8 @@ export function ConfigurationPanel({ config, onChange }: ConfigurationPanelProps
               <span>8k</span>
               <span>16k</span>
               <span>32k</span>
+              <span>64k</span>
+              <span>128k</span>
             </div>
           </div>
         </div>
