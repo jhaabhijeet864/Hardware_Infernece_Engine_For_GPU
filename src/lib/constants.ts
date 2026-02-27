@@ -44,6 +44,13 @@ export const GPU_DATABASE: Omit<GPURecommendation, 'utilization' | 'isOptimal' |
     iconType: 'consumer',
   },
   {
+    id: 'rtx-4090d',
+    name: 'NVIDIA RTX 4090 D',
+    vram: 24,
+    type: 'GDDR6X',
+    iconType: 'consumer',
+  },
+  {
     id: 'rtx-4080',
     name: 'NVIDIA RTX 4080',
     vram: 16,
@@ -72,6 +79,13 @@ export const GPU_DATABASE: Omit<GPURecommendation, 'utilization' | 'isOptimal' |
     iconType: 'consumer',
   },
   {
+    id: 'a6000',
+    name: 'NVIDIA RTX A6000',
+    vram: 48,
+    type: 'GDDR6',
+    iconType: 'datacenter',
+  },
+  {
     id: 'a100-80gb',
     name: 'NVIDIA A100',
     vram: 80,
@@ -93,15 +107,43 @@ export const GPU_DATABASE: Omit<GPURecommendation, 'utilization' | 'isOptimal' |
     iconType: 'datacenter',
   },
   {
+    id: 'h200',
+    name: 'NVIDIA H200',
+    vram: 141,
+    type: 'HBM3e',
+    iconType: 'datacenter',
+  },
+  {
+    id: 'mi300x',
+    name: 'AMD MI300X',
+    vram: 192,
+    type: 'HBM3',
+    iconType: 'datacenter',
+  },
+  {
     id: 'l40s',
     name: 'NVIDIA L40S',
     vram: 48,
     type: 'GDDR6',
     iconType: 'datacenter',
   },
+  {
+    id: 'mac-m2-ultra',
+    name: 'Apple M2 Ultra',
+    vram: 192,
+    type: 'Unified',
+    iconType: 'unified',
+  },
+  {
+    id: 'mac-m3-max',
+    name: 'Apple M3 Max',
+    vram: 128,
+    type: 'Unified',
+    iconType: 'unified',
+  },
 ]
 
-export const CONTEXT_LENGTH_OPTIONS = [512, 2048, 4096, 8192, 16384, 32768]
+export const CONTEXT_LENGTH_OPTIONS = [512, 2048, 4096, 8192, 16384, 32768, 65536, 131072]
 
 export const PRECISION_OPTIONS = [
   { value: 'fp32', label: 'FP32 (Full Precision)' },

@@ -173,15 +173,16 @@ export function InferenceCalculator() {
               value={[params.contextLength]}
               onValueChange={([value]) => setParams((current) => current ? { ...current, contextLength: value } : { parameters: 7, precision: "fp16", contextLength: value })}
               min={512}
-              max={32768}
+              max={131072}
               step={512}
               className="py-4"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>512</span>
               <span>8K</span>
-              <span>16K</span>
               <span>32K</span>
+              <span>64K</span>
+              <span>128K</span>
             </div>
           </div>
         </CardContent>

@@ -145,8 +145,38 @@ export const GPU_OPTIONS: GPUOption[] = [
     ]
   },
   { 
+    name: "H200 141GB", 
+    vram: 141, 
+    tier: "Data Center Premium",
+    cloudPricing: [
+      { provider: "Lambda Labs", pricePerHour: 3.99, availability: "Low" },
+      { provider: "RunPod", pricePerHour: 4.49, availability: "Low" },
+    ]
+  },
+  { 
+    name: "AMD MI300X", 
+    vram: 192, 
+    tier: "Data Center Premium",
+    cloudPricing: [
+      { provider: "Oracle Cloud", pricePerHour: 5.32, availability: "Low" },
+    ]
+  },
+  { 
+    name: "RTX 4090 D", 
+    vram: 24, 
+    tier: "Consumer High-End",
+    cloudPricing: [
+      { provider: "Vast.ai", pricePerHour: 0.44, availability: "Medium" },
+    ]
+  },
+  { 
     name: "Mac M3 Max", 
     vram: 128, 
+    tier: "Unified Memory",
+  },
+  { 
+    name: "Mac M2 Ultra", 
+    vram: 192, 
     tier: "Unified Memory",
   },
 ]
