@@ -13,9 +13,6 @@ Say goodbye to unexpected Out-Of-Memory (OOM) errors! 💥 A modern, lightning-f
 
 </div>
 
-ong><a href="#">✨ Try the Live Demo Here ✨</a></strong></p>
-</div>
-
 ---
 
 ## ✨ Key Features
