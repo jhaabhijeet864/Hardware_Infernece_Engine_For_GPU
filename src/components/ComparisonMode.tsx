@@ -1,35 +1,35 @@
 import { useKV } from "@github/spark/hooks"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
+import { Select, SelectContent, SelectItem, S
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { CopySimple, ArrowsLeftRight } from "@phosphor-icons/react"
-import {
   calculateInferenceMemory,
-  formatMemory,
   getRecommendedGPUs,
-  MODEL_PRESETS,
   PRECISION_OPTIONS,
-  type InferenceParams,
 } from "@/lib/llm-calculations"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import {
+export function ComparisonM
+    parameters:
+    contextLength: 40
 
-export function ComparisonMode() {
-  const [configA, setConfigA] = useKV<InferenceParams>("comparison-config-a", {
-    parameters: 7,
-    precision: "fp16",
-    contextLength: 4096,
-  })
-
-  const [configB, setConfigB] = useKV<InferenceParams>("comparison-config-b", {
     parameters: 13,
-    precision: "int8",
-    contextLength: 4096,
-  })
+    contextLength: 4096
+
+
+  const memoryB = calculateInferenceMemory(conf
+
+  const difference = memoryB.total
+
+    setConfigA((cu
+  }
+  const handleCopyAtoB =
+  }
+
+  }
+  return (
+      <Card className=
+          <div className
+    
 
   if (!configA || !configB) return null
 
@@ -64,72 +64,72 @@ export function ComparisonMode() {
                 <ArrowsLeftRight size={24} className="text-accent" weight="duotone" />
                 Configuration Comparison
               </CardTitle>
-              <CardDescription>Compare two model configurations side-by-side</CardDescription>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleSwap} className="gap-2">
-              <ArrowsLeftRight size={18} weight="duotone" />
-              Swap
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
+                      </SelectItem>
+                  
+              </div>
+              <div className="space-y-2">
+                  
+                    {
+                
+                  id=
+             
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  }
+                  m
+                  className="py-4"
+              </div>
+              <Separator />
+         
+                  <span className="text-muted-foreground">Total VRAM</span>
+                    {formatMemory(memoryA.total)}
+                </div>
+                  <div className="p-3 rounded-lg bg-secondary/20 border border-border/5
+                      <
+                        {gpuA.vra
+                    </div>
+                )}
+            </CardContent>
+        </motion.
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
+          animate={{ opacit
         >
-          <Card className="border-primary/30 bg-card/80 backdrop-blur-sm h-full">
-            <CardHeader className="pb-3 sm:pb-4">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base sm:text-lg">Configuration A</CardTitle>
-                <Button
+            <CardHea
+                <CardTitl
                   variant="ghost"
-                  size="sm"
-                  onClick={handleCopyAtoB}
-                  className="gap-2 text-xs"
+                  onClick={handleCopyBtoA
                 >
-                  <CopySimple size={16} weight="duotone" />
-                  Copy to B
-                </Button>
+                  Copy
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="configA-parameters" className="text-xs sm:text-sm">Model Size (B)</Label>
-                <Input
-                  id="configA-parameters"
-                  type="number"
-                  value={configA.parameters}
-                  onChange={(e) =>
-                    setConfigA((current) =>
-                      current ? { ...current, parameters: parseFloat(e.target.value) || 0 } : { parameters: parseFloat(e.target.value) || 0, precision: "fp16", contextLength: 4096 }
+            <CardContent classN
+                <Label htmlFor="configB-para
+                  id="configB-para
+                  value={configB.parameters
+                    setConfigB((current) =>
                     )
-                  }
-                  min={0.1}
-                  step={0.1}
-                  className="font-mono"
-                />
+                  m
+                  className
               </div>
+              <div className="space-y-2
+                <S
+                  on
 
-              <div className="space-y-2">
-                <Label htmlFor="configA-precision" className="text-xs sm:text-sm">Precision</Label>
-                <Select
-                  value={configA.precision}
-                  onValueChange={(value) =>
-                    setConfigA((current) =>
-                      current ? { ...current, precision: value } : { parameters: 7, precision: value, contextLength: 4096 }
-                    )
                   }
-                >
-                  <SelectTrigger id="configA-precision">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PRECISION_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                  <SelectTrigger id="configB-precision">
+                  </Sel
+                    {PRECISION_OPTIONS.map(
                         {option.label}
+                    ))}
+                </Select>
+
+                <di
+                 
+                  </span>
+                <Slider
+                  value={[configB.
+                    setConfigB((c
+                    )
+                  min={512}
+                  step={512}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -155,7 +155,7 @@ export function ComparisonMode() {
                   max={32768}
                   step={512}
                   className="py-4"
-                />
+        </motion.d
               </div>
 
               <Separator />
@@ -274,31 +274,31 @@ export function ComparisonMode() {
                     {formatMemory(memoryB.total)}
                   </span>
                 </div>
-                {gpuB && (
+
                   <div className="p-3 rounded-lg bg-secondary/20 border border-border/50">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium">{gpuB.name}</span>
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {gpuB.vram} GB
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
 
-      <motion.div
+                        {gpuB.vram} GB
+
+                    </div>
+
+                )}
+
+            </CardContent>
+
+        </motion.div>
+
+
+
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+
         transition={{ duration: 0.4 }}
         key={`${memoryA.total}-${memoryB.total}`}
       >
         <Card className="border-accent/30 bg-card/50 backdrop-blur-sm glow-accent">
           <CardHeader>
-            <CardTitle className="text-lg sm:text-xl">Comparison Results</CardTitle>
+
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -306,7 +306,7 @@ export function ComparisonMode() {
                 <div className="text-xs sm:text-sm text-muted-foreground mb-1">Config A</div>
                 <div className="font-mono text-xl sm:text-2xl font-bold text-primary">
                   {formatMemory(memoryA.total)}
-                </div>
+
               </div>
 
               <div className="p-4 rounded-lg bg-muted/30 border border-border flex flex-col items-center justify-center">
@@ -314,7 +314,7 @@ export function ComparisonMode() {
                 <div className={`font-mono text-xl sm:text-2xl font-bold ${difference > 0 ? "text-destructive" : "text-green-500"}`}>
                   {difference > 0 ? "+" : ""}
                   {formatMemory(Math.abs(difference))}
-                </div>
+
                 <div className="text-xs text-muted-foreground mt-1">
                   {difference > 0 ? "+" : ""}
                   {percentDiff}%
@@ -324,9 +324,9 @@ export function ComparisonMode() {
               <div className="p-4 rounded-lg bg-accent/10 border border-accent/30">
                 <div className="text-xs sm:text-sm text-muted-foreground mb-1">Config B</div>
                 <div className="font-mono text-xl sm:text-2xl font-bold text-accent">
-                  {formatMemory(memoryB.total)}
+
                 </div>
-              </div>
+
             </div>
 
             <Separator />
@@ -338,17 +338,17 @@ export function ComparisonMode() {
                   <div className="flex justify-between">
                     <span>Model Weights:</span>
                     <span className="font-mono">{formatMemory(memoryA.modelWeights)}</span>
-                  </div>
+
                   <div className="flex justify-between">
-                    <span>KV Cache:</span>
+
                     <span className="font-mono">{formatMemory(memoryA.kvCache || 0)}</span>
-                  </div>
+
                   <div className="flex justify-between">
-                    <span>Overhead:</span>
+
                     <span className="font-mono">{formatMemory(memoryA.overhead)}</span>
-                  </div>
+
                 </div>
-              </div>
+
 
               <div className="space-y-2">
                 <h4 className="font-semibold text-accent">Configuration B Details</h4>
@@ -368,9 +368,9 @@ export function ComparisonMode() {
                 </div>
               </div>
             </div>
-          </CardContent>
+
         </Card>
-      </motion.div>
+
     </div>
-  )
+
 }
