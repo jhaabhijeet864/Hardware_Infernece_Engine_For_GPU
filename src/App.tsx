@@ -40,8 +40,16 @@ function App() {
       <Header />
       
       <div className="flex-1 flex flex-col max-w-[1440px] mx-auto w-full p-6 gap-6 overflow-y-auto">
-        <nav className="grid grid-cols-3 gap-1 bg-card p-1 rounded-xl border border-border w-full max-w-2xl mx-auto mb-4">
+        <nav
+          role="tablist"
+          aria-label="Calculator modes"
+          className="grid grid-cols-3 gap-1 bg-card p-1 rounded-xl border border-border w-full max-w-2xl mx-auto mb-4"
+        >
           <button
+            role="tab"
+            aria-selected={activeTab === 'inference'}
+            aria-controls="tabpanel-inference"
+            id="tab-inference"
             onClick={() => setActiveTab('inference')}
             className={`flex flex-col items-center justify-center py-3 rounded-lg relative overflow-hidden group transition-all min-h-[44px] ${
               activeTab === 'inference'
@@ -53,7 +61,7 @@ function App() {
               <div className="absolute inset-0 bg-primary/10 blur-sm group-hover:bg-primary/20 transition-all" />
             )}
             <span className="relative z-10 font-bold tracking-wide flex items-center gap-2">
-              <Cpu size={20} weight="duotone" className="sm:hidden" />
+              <Cpu size={20} weight="duotone" className="sm:hidden" aria-hidden="true" />
               <span className="hidden sm:inline">Inference</span>
               <span className="sm:hidden">Infer</span>
             </span>
@@ -63,6 +71,10 @@ function App() {
           </button>
           
           <button
+            role="tab"
+            aria-selected={activeTab === 'training'}
+            aria-controls="tabpanel-training"
+            id="tab-training"
             onClick={() => setActiveTab('training')}
             className={`flex flex-col items-center justify-center py-3 rounded-lg relative overflow-hidden transition-all min-h-[44px] ${
               activeTab === 'training'
@@ -74,7 +86,7 @@ function App() {
               <div className="absolute inset-0 bg-primary/10 blur-sm transition-all" />
             )}
             <span className="relative z-10 font-medium tracking-wide flex items-center gap-2">
-              <Lightning size={20} weight="duotone" className="sm:hidden" />
+              <Lightning size={20} weight="duotone" className="sm:hidden" aria-hidden="true" />
               <span className="hidden sm:inline">Training</span>
               <span className="sm:hidden">Train</span>
             </span>
@@ -84,6 +96,10 @@ function App() {
           </button>
           
           <button
+            role="tab"
+            aria-selected={activeTab === 'quantization'}
+            aria-controls="tabpanel-quantization"
+            id="tab-quantization"
             onClick={() => setActiveTab('quantization')}
             className={`flex flex-col items-center justify-center py-3 rounded-lg relative overflow-hidden transition-all min-h-[44px] ${
               activeTab === 'quantization'
@@ -95,7 +111,7 @@ function App() {
               <div className="absolute inset-0 bg-primary/10 blur-sm transition-all" />
             )}
             <span className="relative z-10 font-medium tracking-wide flex items-center gap-2">
-              <ChartBar size={20} weight="duotone" className="sm:hidden" />
+              <ChartBar size={20} weight="duotone" className="sm:hidden" aria-hidden="true" />
               <span className="hidden sm:inline">Quantization</span>
               <span className="sm:hidden">Quant</span>
             </span>
@@ -106,7 +122,12 @@ function App() {
         </nav>
 
         {activeTab === 'inference' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div
+            id="tabpanel-inference"
+            role="tabpanel"
+            aria-labelledby="tab-inference"
+            className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+          >
             <div className="lg:col-span-7 flex flex-col gap-6">
               <ModelPresetSelector
                 selectedId={selectedPresetId}
@@ -145,6 +166,9 @@ function App() {
 
         {activeTab === 'training' && (
           <motion.div
+            id="tabpanel-training"
+            role="tabpanel"
+            aria-labelledby="tab-training"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -155,6 +179,9 @@ function App() {
 
         {activeTab === 'quantization' && (
           <motion.div
+            id="tabpanel-quantization"
+            role="tabpanel"
+            aria-labelledby="tab-quantization"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
