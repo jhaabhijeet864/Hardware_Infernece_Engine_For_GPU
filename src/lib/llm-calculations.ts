@@ -8,6 +8,13 @@ export interface GPUOption {
   name: string
   vram: number
   tier: string
+  cloudPricing?: CloudPricing[]
+}
+
+export interface CloudPricing {
+  provider: string
+  pricePerHour: number
+  availability: "High" | "Medium" | "Low"
 }
 
 export interface InferenceParams {
@@ -49,16 +56,99 @@ export const MODEL_PRESETS: ModelPreset[] = [
 ]
 
 export const GPU_OPTIONS: GPUOption[] = [
-  { name: "RTX 4090", vram: 24, tier: "Consumer High-End" },
-  { name: "RTX 4080", vram: 16, tier: "Consumer High-End" },
-  { name: "RTX 4070 Ti", vram: 12, tier: "Consumer Mid-Range" },
-  { name: "RTX 3090", vram: 24, tier: "Consumer Previous Gen" },
-  { name: "A100 40GB", vram: 40, tier: "Data Center" },
-  { name: "A100 80GB", vram: 80, tier: "Data Center" },
-  { name: "H100 80GB", vram: 80, tier: "Data Center Premium" },
-  { name: "L40S", vram: 48, tier: "Data Center" },
-  { name: "A6000", vram: 48, tier: "Workstation" },
-  { name: "Mac M3 Max", vram: 128, tier: "Unified Memory" },
+  { 
+    name: "RTX 4090", 
+    vram: 24, 
+    tier: "Consumer High-End",
+    cloudPricing: [
+      { provider: "RunPod", pricePerHour: 0.69, availability: "High" },
+      { provider: "Vast.ai", pricePerHour: 0.44, availability: "Medium" },
+    ]
+  },
+  { 
+    name: "RTX 4080", 
+    vram: 16, 
+    tier: "Consumer High-End",
+    cloudPricing: [
+      { provider: "RunPod", pricePerHour: 0.49, availability: "High" },
+      { provider: "Vast.ai", pricePerHour: 0.34, availability: "Medium" },
+    ]
+  },
+  { 
+    name: "RTX 4070 Ti", 
+    vram: 12, 
+    tier: "Consumer Mid-Range",
+    cloudPricing: [
+      { provider: "Vast.ai", pricePerHour: 0.24, availability: "Medium" },
+    ]
+  },
+  { 
+    name: "RTX 3090", 
+    vram: 24, 
+    tier: "Consumer Previous Gen",
+    cloudPricing: [
+      { provider: "RunPod", pricePerHour: 0.44, availability: "High" },
+      { provider: "Vast.ai", pricePerHour: 0.29, availability: "High" },
+    ]
+  },
+  { 
+    name: "A100 40GB", 
+    vram: 40, 
+    tier: "Data Center",
+    cloudPricing: [
+      { provider: "AWS", pricePerHour: 4.10, availability: "High" },
+      { provider: "Google Cloud", pricePerHour: 3.67, availability: "High" },
+      { provider: "Azure", pricePerHour: 3.67, availability: "High" },
+      { provider: "Lambda Labs", pricePerHour: 1.10, availability: "Medium" },
+    ]
+  },
+  { 
+    name: "A100 80GB", 
+    vram: 80, 
+    tier: "Data Center",
+    cloudPricing: [
+      { provider: "AWS", pricePerHour: 5.80, availability: "High" },
+      { provider: "Google Cloud", pricePerHour: 5.35, availability: "High" },
+      { provider: "Azure", pricePerHour: 5.35, availability: "High" },
+      { provider: "Lambda Labs", pricePerHour: 1.29, availability: "Medium" },
+    ]
+  },
+  { 
+    name: "H100 80GB", 
+    vram: 80, 
+    tier: "Data Center Premium",
+    cloudPricing: [
+      { provider: "AWS", pricePerHour: 8.14, availability: "Low" },
+      { provider: "Google Cloud", pricePerHour: 7.73, availability: "Low" },
+      { provider: "Azure", pricePerHour: 7.73, availability: "Medium" },
+      { provider: "Lambda Labs", pricePerHour: 2.49, availability: "Medium" },
+      { provider: "RunPod", pricePerHour: 2.69, availability: "High" },
+    ]
+  },
+  { 
+    name: "L40S", 
+    vram: 48, 
+    tier: "Data Center",
+    cloudPricing: [
+      { provider: "AWS", pricePerHour: 3.20, availability: "Medium" },
+      { provider: "Lambda Labs", pricePerHour: 1.29, availability: "High" },
+      { provider: "RunPod", pricePerHour: 1.19, availability: "High" },
+    ]
+  },
+  { 
+    name: "A6000", 
+    vram: 48, 
+    tier: "Workstation",
+    cloudPricing: [
+      { provider: "AWS", pricePerHour: 2.89, availability: "High" },
+      { provider: "Vast.ai", pricePerHour: 0.59, availability: "High" },
+    ]
+  },
+  { 
+    name: "Mac M3 Max", 
+    vram: 128, 
+    tier: "Unified Memory",
+  },
 ]
 
 export const PRECISION_OPTIONS = [

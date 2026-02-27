@@ -20,6 +20,9 @@ import {
 import { motion } from "framer-motion"
 import { ExportButton } from "@/components/ExportButton"
 import type { ExportData } from "@/lib/export-utils"
+import { CloudPricingCard } from "@/components/CloudPricingCard"
+import { saveCalculationToHistory, type CalculationEntry } from "@/components/HistoricalTracking"
+import { useEffect } from "react"
 
 export function InferenceCalculator() {
   const [params, setParams] = useKV<InferenceParams>("inference-params", {
@@ -28,10 +31,30 @@ export function InferenceCalculator() {
     contextLength: 4096,
   })
 
+  const [history, setHistory] = useKV<CalculationEntry[]>("calculation-history", [])
+
   if (!params) return null
 
   const memory = calculateInferenceMemory(params)
   const recommendedGPUs = getRecommendedGPUs(memory.total)
+
+  useEffect(() => {
+    const entry = saveCalculationToHistory({
+      type: "inference",
+      params,
+      totalMemory: memory.total,
+      gpuRecommendation: recommendedGPUs[0]?.name,
+    })
+
+    setHistory((current) => {
+      if (!current) return [entry]
+      const filtered = current.filter((e) => e.timestamp > Date.now() - 60000)
+      if (filtered.length === 0 || filtered[0].totalMemory !== entry.totalMemory) {
+        return [entry, ...current].slice(0, 50)
+      }
+      return current
+    })
+  }, [memory.total, params.parameters, params.precision, params.contextLength])
 
   const handlePresetClick = (preset: typeof MODEL_PRESETS[0]) => {
     setParams((current) => current ? { ...current, parameters: preset.parameters } : { parameters: preset.parameters, precision: "fp16", contextLength: 4096 })
@@ -252,6 +275,19 @@ export function InferenceCalculator() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {recommendedGPUs.length > 0 && recommendedGPUs[0] && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          <CloudPricingCard
+            gpu={recommendedGPUs[0]}
+            utilizationPercent={(memory.total / recommendedGPUs[0].vram) * 100}
+          />
+        </motion.div>
+      )}
     </div>
   )
 }

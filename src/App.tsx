@@ -3,7 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InferenceCalculator } from "@/components/InferenceCalculator"
 import { TrainingCalculator } from "@/components/TrainingCalculator"
 import { QuantizationComparison } from "@/components/QuantizationComparison"
-import { GraphicsCard, Lightning, ChartBar } from "@phosphor-icons/react"
+import { ComparisonMode } from "@/components/ComparisonMode"
+import { HistoricalTracking } from "@/components/HistoricalTracking"
+import { GraphicsCard, Lightning, ChartBar, ArrowsLeftRight, ClockCounterClockwise } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 import { Toaster } from "@/components/ui/sonner"
 
@@ -34,7 +36,7 @@ function App() {
         </motion.header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-card/50 border border-border backdrop-blur-sm">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 h-auto p-1 bg-card/50 border border-border backdrop-blur-sm">
             <TabsTrigger
               value="inference"
               className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all min-h-[44px]"
@@ -56,6 +58,20 @@ function App() {
               <ChartBar size={20} weight="duotone" className="shrink-0" />
               <span className="text-xs sm:text-sm">Quantization</span>
             </TabsTrigger>
+            <TabsTrigger
+              value="comparison"
+              className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all min-h-[44px]"
+            >
+              <ArrowsLeftRight size={20} weight="duotone" className="shrink-0" />
+              <span className="text-xs sm:text-sm">Compare</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="history"
+              className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground transition-all min-h-[44px]"
+            >
+              <ClockCounterClockwise size={20} weight="duotone" className="shrink-0" />
+              <span className="text-xs sm:text-sm">History</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="inference" className="mt-4 sm:mt-6">
@@ -68,6 +84,14 @@ function App() {
 
           <TabsContent value="quantization" className="mt-4 sm:mt-6">
             <QuantizationComparison />
+          </TabsContent>
+
+          <TabsContent value="comparison" className="mt-4 sm:mt-6">
+            <ComparisonMode />
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-4 sm:mt-6">
+            <HistoricalTracking />
           </TabsContent>
         </Tabs>
 
