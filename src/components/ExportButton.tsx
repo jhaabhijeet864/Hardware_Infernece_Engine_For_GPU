@@ -39,7 +39,7 @@ export function ExportButton({ data, disabled = false }: ExportButtonProps) {
       setLinkCopied(true)
       toast.success("Shareable link copied to clipboard!")
       setTimeout(() => setLinkCopied(false), 2000)
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy link to clipboard")
     }
   }

@@ -10,14 +10,6 @@ import { Progress } from "@/components/ui/progress"
 import { ExportButton } from "@/components/ExportButton"
 import type { ExportData, QuantizationResults } from "@/lib/export-utils"
 
-interface QuantizationResult {
-  precision: string
-  label: string
-  memory: number
-  qualityRetention: number
-  speedup: number
-}
-
 function generateQuantizationResults(modelSize: number): QuantizationResults {
   const comparisons = PRECISION_OPTIONS.map((option) => {
     const memory = modelSize * option.bytesPerParam

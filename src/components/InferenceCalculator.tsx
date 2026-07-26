@@ -22,7 +22,7 @@ import { ExportButton } from "@/components/ExportButton"
 import type { ExportData } from "@/lib/export-utils"
 import { CloudPricingCard } from "@/components/CloudPricingCard"
 import { saveCalculationToHistory, type CalculationEntry } from "@/components/HistoricalTracking"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 
 export function InferenceCalculator() {
   const [params, setParams] = useKV<InferenceParams>("inference-params", {
@@ -31,17 +31,21 @@ export function InferenceCalculator() {
     contextLength: 4096,
   })
 
-  const [history, setHistory] = useKV<CalculationEntry[]>("calculation-history", [])
+  const [, setHistory] = useKV<CalculationEntry[]>("calculation-history", [])
 
-  if (!params) return null
+  const currentParams = useMemo(() => params ?? {
+    parameters: 7,
+    precision: "fp16",
+    contextLength: 4096,
+  }, [params])
 
-  const memory = calculateInferenceMemory(params)
+  const memory = calculateInferenceMemory(currentParams)
   const recommendedGPUs = getRecommendedGPUs(memory.total)
 
   useEffect(() => {
     const entry = saveCalculationToHistory({
       type: "inference",
-      params,
+      params: currentParams,
       totalMemory: memory.total,
       gpuRecommendation: recommendedGPUs[0]?.name,
     })
@@ -54,7 +58,7 @@ export function InferenceCalculator() {
       }
       return current
     })
-  }, [memory.total, params.parameters, params.precision, params.contextLength])
+  }, [currentParams, memory.total, recommendedGPUs, setHistory])
 
   const handlePresetClick = (preset: typeof MODEL_PRESETS[0]) => {
     setParams((current) => current ? { ...current, parameters: preset.parameters } : { parameters: preset.parameters, precision: "fp16", contextLength: 4096 })
@@ -121,7 +125,7 @@ export function InferenceCalculator() {
               <Input
                 id="parameters"
                 type="number"
-                value={params.parameters}
+                value={currentParams.parameters}
                 onChange={(e) => setParams((current) => current ? { ...current, parameters: parseFloat(e.target.value) || 0 } : { parameters: parseFloat(e.target.value) || 0, precision: "fp16", contextLength: 4096 })}
                 min={0.1}
                 step={0.1}
@@ -132,7 +136,7 @@ export function InferenceCalculator() {
             <div className="space-y-2">
               <Label htmlFor="precision">Precision</Label>
               <Select
-                value={params.precision}
+                value={currentParams.precision}
                 onValueChange={(value) => setParams((current) => current ? { ...current, precision: value } : { parameters: 7, precision: value, contextLength: 4096 })}
               >
                 <SelectTrigger id="precision">
@@ -165,12 +169,12 @@ export function InferenceCalculator() {
                 </TooltipProvider>
               </Label>
               <span className="font-mono text-sm text-muted-foreground">
-                {params.contextLength.toLocaleString()} tokens
+                {currentParams.contextLength.toLocaleString()} tokens
               </span>
             </div>
             <Slider
               id="contextLength"
-              value={[params.contextLength]}
+              value={[currentParams.contextLength]}
               onValueChange={([value]) => setParams((current) => current ? { ...current, contextLength: value } : { parameters: 7, precision: "fp16", contextLength: value })}
               min={512}
               max={131072}

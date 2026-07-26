@@ -5,14 +5,13 @@ import { Button } from "@/components/ui/button"
 import { ClockCounterClockwise, Trash, TrendUp } from "@phosphor-icons/react"
 import { formatMemory } from "@/lib/llm-calculations"
 import { motion, AnimatePresence } from "framer-motion"
-import { Separator } from "@/components/ui/separator"
 import { useState } from "react"
 
 export interface CalculationEntry {
   id: string
   timestamp: number
   type: "inference" | "training" | "quantization"
-  params: Record<string, any>
+  params: Record<string, unknown>
   totalMemory: number
   gpuRecommendation?: string
 }
