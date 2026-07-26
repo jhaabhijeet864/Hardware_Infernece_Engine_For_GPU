@@ -310,7 +310,7 @@ function generatePDFContent(data: ExportData): string {
 export async function copyToClipboard(text: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text)
-  } catch (err) {
+  } catch {
     const textArea = document.createElement("textarea")
     textArea.value = text
     textArea.style.position = "fixed"

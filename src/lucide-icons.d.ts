@@ -1,4 +1,4 @@
 declare module 'lucide-react/dist/esm/icons/*' {
-  const Icon: any
+  const Icon: unknown
   export default Icon
 }

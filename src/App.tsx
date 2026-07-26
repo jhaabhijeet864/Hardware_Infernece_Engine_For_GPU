@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ModelPresetSelector } from '@/components/ModelPresetSelector'
 import { ConfigurationPanel } from '@/components/ConfigurationPanel'
 import { ResultsDisplay } from '@/components/ResultsDisplay'

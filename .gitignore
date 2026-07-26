@@ -31,4 +31,9 @@ pids
 .file-manifest
 .devcontainer/
 
+# Local AI agent instruction files
+CLAUDE.md
+AGENT.md
+GEMINI.md
+
 .spark-workbench-id
