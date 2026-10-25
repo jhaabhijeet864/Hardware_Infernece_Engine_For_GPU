@@ -1,3 +1,5 @@
+import { calculateInferenceWorkload, PrecisionFormat } from './engine'
+
 export interface ModelPreset {
   name: string
   parameters: number
@@ -202,23 +204,23 @@ export const TRAINING_METHODS = [
 ]
 
 export function calculateInferenceMemory(params: InferenceParams): MemoryBreakdown {
-  const precision = PRECISION_OPTIONS.find(p => p.value === params.precision)
-  if (!precision) throw new Error("Invalid precision")
+  const precisionKey = params.precision.toUpperCase() as PrecisionFormat
+  const result = calculateInferenceWorkload({
+    model: `custom-${params.parameters}b`,
+    precision: precisionKey,
+    contextLength: params.contextLength,
+    batchSize: 1,
+    cudaRuntimeOverheadGiB: 0.8,
+  })
 
-  const modelWeights = params.parameters * precision.bytesPerParam
-  
-  const kvCache = (params.contextLength * params.parameters * 0.00002 * 2) * 
-                  (precision.bytesPerParam / 4)
-  
-  const overhead = modelWeights * 0.1
-
-  const total = modelWeights + kvCache + overhead
+  const mem = result.memory
+  const overhead = parseFloat((mem.activationOverheadGiB + mem.cudaContextGiB).toFixed(2))
 
   return {
-    modelWeights,
-    kvCache,
+    modelWeights: mem.weightsGiB,
+    kvCache: mem.kvCacheGiB,
     overhead,
-    total,
+    total: mem.totalVRAMRequiredGiB,
   }
 }
 
@@ -228,6 +230,7 @@ export function calculateTrainingMemory(params: TrainingParams): MemoryBreakdown
   
   if (!precision || !optimizer) throw new Error("Invalid parameters")
 
+  // Theoretical upper-bound approximations - labeled experimental
   let modelWeights = params.parameters * precision.bytesPerParam
   let gradients = params.parameters * precision.bytesPerParam
   let optimizerStates = params.parameters * optimizer.stateMultiplier * 4
@@ -260,14 +263,17 @@ export function calculateTrainingMemory(params: TrainingParams): MemoryBreakdown
   }
 }
 
-export function formatMemory(gb: number): string {
-  if (gb < 1) return `${Math.round(gb * 1024)} MB`
-  return `${gb.toFixed(2)} GB`
+export function formatMemory(gib: number): string {
+  if (gib < 1) return `${Math.round(gib * 1024)} MiB`
+  return `${gib.toFixed(2)} GiB`
 }
 
-export function getRecommendedGPUs(requiredMemory: number): GPUOption[] {
+export function getRecommendedGPUs(requiredMemoryGiB: number): GPUOption[] {
   return GPU_OPTIONS
-    .filter(gpu => gpu.vram >= requiredMemory)
-    .sort((a, b) => a.vram - b.vram)
+    .filter(gpu => gpu.vram >= requiredMemoryGiB)
+    .sort((a, b) => {
+      // Sort by best headroom fit (lowest VRAM that still fits comfortably)
+      return a.vram - b.vram
+    })
     .slice(0, 5)
 }
