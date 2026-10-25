@@ -9,6 +9,7 @@
     "kill": "fuser -k 5000/tcp",
     "build": "tsc -b --noCheck && vite build",
     "lint": "eslint .",
+    "test": "npx tsx src/lib/engine/__tests__/calculator.test.ts",
     "optimize": "vite optimize",
     "preview": "vite preview"
   },
