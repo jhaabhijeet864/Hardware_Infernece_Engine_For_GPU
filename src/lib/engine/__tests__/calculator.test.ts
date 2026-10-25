@@ -36,8 +36,6 @@ console.log('--- Starting Engine Mathematical Verification Tests ---')
 // 2. Test Case 2: GQA vs MHA Compression
 {
   const llama8b = MODEL_REGISTRY['llama-3.1-8b']
-  const phi3 = MODEL_REGISTRY['phi-3-mini'] // MHA with 32 KV heads
-  
   const gqaBytes = calculateKVCacheBytes(llama8b, 4096, 1, 'FP16')
   // Simulated MHA with 32 KV heads (4x more KV heads than GQA)
   const mhaArch = { ...llama8b, numKeyValueHeads: 32 }
