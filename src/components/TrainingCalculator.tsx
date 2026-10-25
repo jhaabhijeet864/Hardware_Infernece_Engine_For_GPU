@@ -51,6 +51,14 @@ export function TrainingCalculator() {
 
   return (
     <div className="space-y-6">
+      <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs flex items-start gap-2.5">
+        <Info size={18} className="text-amber-400 shrink-0 mt-0.5" weight="duotone" />
+        <div>
+          <span className="font-bold text-amber-300 uppercase tracking-wide text-[10px] block mb-0.5">Experimental Estimation Mode</span>
+          Training memory requirements are theoretical analytical approximations. Actual memory varies significantly based on framework implementation (PyTorch FSDP / DeepSpeed ZeRO-3), activation checkpointing, and gradient accumulation sequence packing.
+        </div>
+      </div>
+
       <Card className="border-border/50">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

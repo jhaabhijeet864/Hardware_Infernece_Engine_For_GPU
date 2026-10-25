@@ -11,9 +11,9 @@ export function Header() {
         </div>
         <div>
           <h1 className="text-white text-xl font-bold leading-tight tracking-tight">
-            LLM Hardware Calculator
+            Hardware Inference & Qualification Engine
           </h1>
-          <p className="text-muted-foreground text-xs font-mono">VRAM Estimation Tool v2.0</p>
+          <p className="text-muted-foreground text-xs font-mono">Local AI Workload Validation v2.0</p>
         </div>
       </div>
       

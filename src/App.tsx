@@ -27,8 +27,8 @@ function App() {
 
   const memoryBreakdown = useMemo(() => {
     if (!config) return { modelWeights: 0, kvCache: 0, overhead: 0, total: 0 }
-    return calculateMemoryRequirements(config)
-  }, [config])
+    return calculateMemoryRequirements(config, selectedPresetId)
+  }, [config, selectedPresetId])
 
   if (!activeTab || !selectedPresetId || !config) {
     return null
