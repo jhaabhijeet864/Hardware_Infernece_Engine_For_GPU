@@ -1,23 +1,30 @@
 import { useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { ModelPresetSelector } from '@/components/ModelPresetSelector'
-import { ConfigurationPanel } from '@/components/ConfigurationPanel'
+import { WorkloadBuilder } from '@/components/WorkloadBuilder'
 import { ResultsDisplay } from '@/components/ResultsDisplay'
 import { GPURecommendations } from '@/components/GPURecommendations'
 import { TrainingCalculator } from '@/components/TrainingCalculator'
 import { QuantizationComparison } from '@/components/QuantizationComparison'
 import { Header } from '@/components/Header'
-import { Cpu, Lightning, ChartBar } from '@phosphor-icons/react'
+import { Lightning, ChartBar, ShieldCheck } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { Toaster } from '@/components/ui/sonner'
 import { calculateMemoryRequirements } from '@/lib/calculator'
+import {
+  WORKLOAD_ARCHETYPES,
+  calculateWorkloadMemory,
+  WorkloadSpecification,
+} from '@/lib/engine'
 import type { TabMode, CalculatorConfig } from '@/lib/types'
 
 function App() {
   const [activeTab, setActiveTab] = useKV<TabMode>('active-tab', 'inference')
-  const [selectedPresetId, setSelectedPresetId] = useKV('selected-preset-id', 'llama3-8b')
-  
-  const [config, setConfig] = useKV<CalculatorConfig>('calculator-config', {
+  const [workload, setWorkload] = useKV<WorkloadSpecification>(
+    'active-workload-spec',
+    WORKLOAD_ARCHETYPES[0]
+  )
+
+  const [legacyConfig] = useKV<CalculatorConfig>('calculator-config', {
     parameters: 8,
     precision: 'fp16',
     contextLength: 8192,
@@ -25,12 +32,18 @@ function App() {
     flashAttention: true,
   })
 
-  const memoryBreakdown = useMemo(() => {
-    if (!config) return { modelWeights: 0, kvCache: 0, overhead: 0, total: 0 }
-    return calculateMemoryRequirements(config, selectedPresetId)
-  }, [config, selectedPresetId])
+  // Synchronize workload changes to legacy breakdown for fallback components
+  const workloadSizing = useMemo(() => {
+    const active = workload || WORKLOAD_ARCHETYPES[0]
+    return calculateWorkloadMemory(active)
+  }, [workload])
 
-  if (!activeTab || !selectedPresetId || !config) {
+  const memoryBreakdown = useMemo(() => {
+    if (!legacyConfig) return { modelWeights: 0, kvCache: 0, overhead: 0, total: 0 }
+    return calculateMemoryRequirements(legacyConfig, workload?.modelId)
+  }, [legacyConfig, workload?.modelId])
+
+  if (!activeTab || !workload) {
     return null
   }
 
@@ -39,10 +52,11 @@ function App() {
       <Header />
       
       <div className="flex-1 flex flex-col max-w-[1440px] mx-auto w-full p-6 gap-6 overflow-y-auto">
+        {/* Navigation Tabs */}
         <nav
           role="tablist"
           aria-label="Calculator modes"
-          className="grid grid-cols-3 gap-1 bg-card p-1 rounded-xl border border-border w-full max-w-2xl mx-auto mb-4"
+          className="grid grid-cols-3 gap-1 bg-card p-1 rounded-xl border border-border w-full max-w-2xl mx-auto mb-2"
         >
           <button
             role="tab"
@@ -60,9 +74,8 @@ function App() {
               <div className="absolute inset-0 bg-primary/10 blur-sm group-hover:bg-primary/20 transition-all" />
             )}
             <span className="relative z-10 font-bold tracking-wide flex items-center gap-2">
-              <Cpu size={20} weight="duotone" className="sm:hidden" aria-hidden="true" />
-              <span className="hidden sm:inline">Inference</span>
-              <span className="sm:hidden">Infer</span>
+              <ShieldCheck size={20} weight="duotone" className="text-cyan-400" aria-hidden="true" />
+              <span>Workload Qualification</span>
             </span>
             {activeTab === 'inference' && (
               <div className="absolute bottom-0 h-[2px] w-1/3 bg-primary shadow-[0_0_10px_oklch(0.59_0.24_305)]" />
@@ -85,9 +98,8 @@ function App() {
               <div className="absolute inset-0 bg-primary/10 blur-sm transition-all" />
             )}
             <span className="relative z-10 font-medium tracking-wide flex items-center gap-2">
-              <Lightning size={20} weight="duotone" className="sm:hidden" aria-hidden="true" />
-              <span className="hidden sm:inline">Training</span>
-              <span className="sm:hidden">Train</span>
+              <Lightning size={20} weight="duotone" className="text-amber-400" aria-hidden="true" />
+              <span>Fine-Tuning Sizing</span>
             </span>
             {activeTab === 'training' && (
               <div className="absolute bottom-0 h-[2px] w-1/3 bg-primary shadow-[0_0_10px_oklch(0.59_0.24_305)]" />
@@ -110,9 +122,8 @@ function App() {
               <div className="absolute inset-0 bg-primary/10 blur-sm transition-all" />
             )}
             <span className="relative z-10 font-medium tracking-wide flex items-center gap-2">
-              <ChartBar size={20} weight="duotone" className="sm:hidden" aria-hidden="true" />
-              <span className="hidden sm:inline">Quantization</span>
-              <span className="sm:hidden">Quant</span>
+              <ChartBar size={20} weight="duotone" className="text-purple-400" aria-hidden="true" />
+              <span>Quantization Trade-offs</span>
             </span>
             {activeTab === 'quantization' && (
               <div className="absolute bottom-0 h-[2px] w-1/3 bg-primary shadow-[0_0_10px_oklch(0.59_0.24_305)]" />
@@ -120,6 +131,7 @@ function App() {
           </button>
         </nav>
 
+        {/* Inference / Workload Qualification View */}
         {activeTab === 'inference' && (
           <div
             id="tabpanel-inference"
@@ -128,41 +140,26 @@ function App() {
             className="grid grid-cols-1 lg:grid-cols-12 gap-6"
           >
             <div className="lg:col-span-7 flex flex-col gap-6">
-              <ModelPresetSelector
-                selectedId={selectedPresetId}
-                onSelect={(preset) => {
-                  setSelectedPresetId(preset.id)
-                  setConfig((prev) => ({
-                    parameters: preset.parameters,
-                    precision: prev?.precision || 'fp16',
-                    contextLength: prev?.contextLength || 8192,
-                    kvCacheQuantization: prev?.kvCacheQuantization || false,
-                    flashAttention: prev?.flashAttention || true,
-                  }))
-                }}
-              />
-              
-              <ConfigurationPanel
-                config={config}
-                onChange={(updateFn) => {
-                  const result = updateFn(config)
-                  setConfig(result)
-                }}
+              <WorkloadBuilder
+                workload={workload}
+                onChange={setWorkload}
               />
             </div>
 
             <div className="lg:col-span-5 flex flex-col gap-6">
               <ResultsDisplay
                 memoryBreakdown={memoryBreakdown}
+                workloadSizing={workloadSizing}
               />
               
               <GPURecommendations
-                requiredVRAM={memoryBreakdown.total}
+                requiredVRAM={workloadSizing.peakMemory.totalVRAMRequiredGiB}
               />
             </div>
           </div>
         )}
 
+        {/* Training Tab */}
         {activeTab === 'training' && (
           <motion.div
             id="tabpanel-training"
@@ -176,6 +173,7 @@ function App() {
           </motion.div>
         )}
 
+        {/* Quantization Tab */}
         {activeTab === 'quantization' && (
           <motion.div
             id="tabpanel-quantization"
@@ -189,15 +187,21 @@ function App() {
           </motion.div>
         )}
 
-        <footer className="mt-8 pt-6 border-t border-border/50">
-          <p className="text-center text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Memory calculations are estimates based on standard architectures. Actual requirements may
-            vary depending on implementation details and optimizations.
+        {/* Footer */}
+        <footer className="mt-8 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <p>
+            Local AI Hardware Qualification Suite • Target: NVIDIA Workstations &amp; Serving Rigs (vLLM / TensorRT-LLM)
           </p>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-highlight border border-border">
+              <span className="size-1.5 rounded-full bg-emerald-400" />
+              Engine v2.0 Active
+            </span>
+          </div>
         </footer>
       </div>
       
-      <Toaster />
+      <Toaster position="bottom-right" richColors />
     </div>
   )
 }
