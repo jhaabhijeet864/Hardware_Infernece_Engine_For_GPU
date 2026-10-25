@@ -3,18 +3,18 @@
 ## Phase 1: Estimation Engine Hardening & Scientific Integrity
 **Focus**: Decouple math, fix KV-cache formulas with architectural awareness, enforce GiB vs GB units, establish test suite, and clean up ambiguous labels in the existing UI.
 
-- [ ] **1.1 Engine Extraction & Architecture Math**:
+- [x] **1.1 Engine Extraction & Architecture Math**:
   - Extract calculation logic into pure TypeScript module `src/lib/engine/`.
   - Implement full KV-cache formula with layer count ($L$), KV heads ($H_{\text{KV}}$), head dimension ($D_{\text{head}}$), token length ($T$), and batch ($B$).
   - Add model architecture database with presets for Llama 3/3.1, Mistral, Gemma 2, Qwen 2.5, DeepSeek, Phi-3.
-- [ ] **1.2 Unit Clarity & Status Classification**:
+- [x] **1.2 Unit Clarity & Status Classification**:
   - Distinguish GiB (binary) and GB (decimal) across calculations and display.
   - Implement result classification: `Analytical Estimate`, `Calibrated Estimate`, `Measured Result`, `Unsupported`.
-- [ ] **1.3 UI Clean-up & Honesty**:
+- [x] **1.3 UI Clean-up & Honesty**:
   - Replace "GPU Utilization" with "Estimated Memory Occupancy".
   - Replace unconditional "BEST MATCH" with criteria-based status (Fits Memory, Meets Target SLA).
   - Add explicit "Experimental" badges to Training and Quantization calculators.
-- [ ] **1.4 Verification**:
+- [x] **1.4 Verification**:
   - Unit tests covering known model configurations and architectural edge cases against HuggingFace/vLLM baselines.
 
 ## Phase 2: Workload Specification & UI Flow
