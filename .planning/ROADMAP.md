@@ -20,12 +20,12 @@
 ## Phase 2: Workload Specification & UI Flow
 **Focus**: Provide a structured input specification covering serving demands, concurrency, and SLA targets.
 
-- [ ] **2.1 Workload Specification Schema**:
+- [x] **2.1 Workload Specification Schema**:
   - Define schema: Model ID, precision/quantization, prompt length (P50/P99), generation length (P50/P99), concurrency (active requests), arrival pattern, SLA thresholds (TTFT max, ITL target).
-- [ ] **2.2 Workload Form & Preset Overhaul**:
+- [x] **2.2 Workload Form & Preset Overhaul**:
   - Create interactive Workload Builder component replacing simplistic parameter-only inputs.
   - Distinguish active concurrent requests from registered users.
-- [ ] **2.3 Feasibility Pre-Check View**:
+- [x] **2.3 Feasibility Pre-Check View**:
   - Display analytical feasibility with clear disclaimers ("Performance not measured for this hardware. Validation suite required before purchase approval").
 
 ## Phase 3: Local Benchmark Runner CLI (`hw-qual-cli`)
