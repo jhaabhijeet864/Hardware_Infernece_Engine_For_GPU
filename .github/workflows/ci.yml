@@ -10,7 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-test:
+    name: Lint, Test, and Build
     runs-on: ubuntu-latest
 
     steps:
@@ -29,10 +30,8 @@ jobs:
       - name: Run linting
         run: npm run lint
 
-      - name: Build project
-        run: npm run build
+      - name: Run automated mathematical tests
+        run: npm run test
 
-      - name: Run tests (placeholder)
-        run: echo "Tests will be added in a future PR"
-        # TODO: Uncomment the following line once tests are added
-        # run: npm run test
+      - name: Build production bundle
+        run: npm run build
