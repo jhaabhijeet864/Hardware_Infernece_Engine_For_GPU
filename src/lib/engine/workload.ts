@@ -1,5 +1,5 @@
 import { PrecisionFormat, ComponentMemoryBreakdown } from './types'
-import { MODEL_REGISTRY, getModelArchitecture } from './registry'
+import { getModelArchitecture } from './registry'
 import { calculateInferenceWorkload } from './calculator'
 
 export type ServingRuntime = 'vllm' | 'tensorrt-llm' | 'ollama' | 'tgi'

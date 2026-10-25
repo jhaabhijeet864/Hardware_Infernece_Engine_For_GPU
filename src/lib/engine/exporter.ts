@@ -1,5 +1,4 @@
 import { WorkloadSpecification, WorkloadMemorySizing } from './workload'
-import { getModelArchitecture } from './registry'
 
 export interface BenchmarkSpecBundle {
   schemaVersion: '1.0'
@@ -27,7 +26,6 @@ export interface BenchmarkSpecBundle {
 
 export function generateBenchmarkSpecBundle(sizing: WorkloadMemorySizing): BenchmarkSpecBundle {
   const { workload, typicalMemory, peakMemory } = sizing
-  const arch = getModelArchitecture(workload.modelId)
 
   // Map to vLLM bench serve arguments
   const numTestPrompts = Math.max(50, workload.concurrency * 10)
