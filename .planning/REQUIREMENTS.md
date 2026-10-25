@@ -1,0 +1,50 @@
+# Requirements: Hardware Qualification & Workload Validation Suite
+
+## 1. Engine & Scientific Integrity (ENG)
+- **ENG-01**: Mathematical calculation engine must be completely decoupled from React DOM components and runnable in Node/browser environments with 100% test coverage for supported models.
+- **ENG-02**: KV cache calculations must use architectural metadata:
+  $$M_{\text{KV}} \approx 2 \times L \times H_{\text{KV}} \times D_{\text{head}} \times T \times B \times s$$
+  accounting for MHA, GQA, and MQA correctly.
+- **ENG-03**: Memory units must be strictly explicit: binary Gibibytes (GiB) and decimal Gigabytes (GB) clearly labeled and converted accurately.
+- **ENG-04**: Every estimation must return an explicit status:
+  - `Analytical Estimate` (formulaic based on declared architecture)
+  - `Calibrated Estimate` (empirically adjusted for specific known runtime setups)
+  - `Measured Result` (ingested from benchmark execution)
+  - `Unsupported` (clearly stating missing architectural or runtime data)
+- **ENG-05**: Replace vague labels like "Utilization" with "Estimated Memory Occupancy" and eliminate arbitrary "Best Match" in favor of criteria-based filtering (Fits Memory, Meets Target SLA, Lowest Quoted Cost).
+
+## 2. Workload Specification (WKL)
+- **WKL-01**: Structured schema for workload inputs:
+  - Exact Model ID & Revision (e.g., `meta-llama/Llama-3.1-8B-Instruct`)
+  - Target Serving Runtime & Version (e.g., vLLM 0.6.x, Ollama, TensorRT-LLM)
+  - Quantization format (FP16, BF16, AWQ INT4, GPTQ INT4, FP8, GGUF)
+  - Input token length distribution (Prompt P50, Prompt P99)
+  - Output token length target (Generation P50, Generation P99)
+  - Request concurrency / arrival rate (QPS and concurrent client streams)
+  - Target latency SLA thresholds (TTFT < X ms, ITL / TPS > Y tokens/sec)
+- **WKL-02**: Distinct UI separation between simultaneous active requests (concurrency) and total registered enterprise users.
+
+## 3. Local Benchmark Runner & Telemetry (RUN)
+- **RUN-01**: A lightweight CLI / execution adapter capable of running on target machines.
+- **RUN-02**: Capture target machine environment: OS, CPU, RAM, GPU model(s), VRAM capacity, driver version (e.g. NVIDIA 550+), CUDA version, runtime version.
+- **RUN-03**: Integrate with `vllm bench serve` / GenAI-Perf to execute controlled load tests against the specified model and workload.
+- **RUN-04**: Capture actual memory watermark, TTFT (P50, P90, P99), ITL, request latency, throughput, error rate, and OOM occurrences.
+- **RUN-05**: Output a structured, tamper-evident JSON result bundle containing run metadata and telemetry.
+
+## 4. Hardware Acceptance & Comparison Reports (REP)
+- **REP-01**: Ingest local run result bundles into the web interface or generate standalone HTML/PDF reports.
+- **REP-02**: Compare Analytical Estimate vs. Measured Result side-by-side with delta analysis.
+- **REP-03**: Evaluate Pass / Fail criteria against customer SLA thresholds:
+  - Memory Fit: Pass / Fail
+  - TTFT SLA: Pass / Fail
+  - Throughput SLA: Pass / Fail
+  - Error/OOM Count: 0 required for Pass
+- **REP-04**: Generate a branded, signed/reproducible Hardware Acceptance Certificate suitable for hardware suppliers to deliver with shipped machines.
+
+## 5. UI Polish & Workflow Integration (UI)
+- **UI-01**: Refactor existing preset selector and calculators into the Workload Qualification Workflow:
+  1. *Specify Workload*
+  2. *Estimate Feasibility*
+  3. *Configure / Run Benchmark*
+  4. *Inspect Acceptance Report*
+- **UI-02**: Clear indicators for experimental features (Training calculator, exploratory Quantization trade-offs).
