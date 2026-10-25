@@ -1,0 +1,84 @@
+name: 🐛 Bug Report
+description: Report an issue, bug, or unexpected behavior in the calculator
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please fill out the form below to help us locate and resolve the bug quickly.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: "e.g., The VRAM calculation for Mistral 7B INT4 produces an incorrect KV-cache estimation when context length is set to 32k..."
+    validations:
+      required: true
+
+  - type: input
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: What steps led to the issue?
+      placeholder: "1. Select Inference Mode -> 2. Choose Llama-3-8B -> 3. Change batch size to 8..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected vs. Actual Behavior
+      description: What did you expect to happen, and what happened instead?
+      placeholder: "Expected VRAM allocation of ~16.2 GB, but calculator showed 28.5 GB."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Affected Mode
+      description: Which calculator module was affected?
+      options:
+        - Inference Mode
+        - Training / Fine-Tuning Mode
+        - Quantization Comparison Mode
+        - PDF Export / Shareable Link
+        - UI / Layout / Responsiveness
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Browser & Operating System
+      description: What browser and operating system are you using?
+      options:
+        - Chrome / Chromium
+        - Firefox
+        - Safari
+        - Edge
+        - Mobile Browser
+        - Other
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Console Logs
+      description: Paste any screenshots or browser console errors here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and verified this is not a duplicate.
+          required: true
+        - label: I have followed the project's Code of Conduct.
+          required: true

@@ -1,0 +1,51 @@
+name: 💡 Feature Request
+description: Propose a new feature, improvement, or mathematical model enhancement
+title: "[Feature]: "
+labels: ["enhancement", "feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make **Hardware-Inference** better? Let us know below!
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: What would you like to see added or improved?
+      placeholder: "e.g., Add support for Multi-Token Prediction (MTP) memory calculations in deepseek architectures..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-or-use-case
+    attributes:
+      label: Problem Statement or Use Case
+      description: Is your feature request related to a specific problem or workflow?
+      placeholder: "When planning deployment for DeepSeek-V3 or DeepSeek-R1, speculative decoding and MTP overhead are not represented in current KV estimates."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution or Specification
+      description: Describe the solution you'd like to see, formulas, or UI mockups if any.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Approaches Considered
+      description: Describe any alternative solutions or features you've considered.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution Willingness
+      options:
+        - label: I am interested in submitting a Pull Request to implement this feature.
+          required: false

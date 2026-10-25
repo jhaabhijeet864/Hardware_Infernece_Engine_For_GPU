@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Community Discussions
+    url: https://github.com/discussions
+    about: Ask questions, share your hardware setups, and connect with the community.
+  - name: 🛡️ Security Vulnerabilities
+    url: https://github.com/security/advisories/new
+    about: Report sensitive security vulnerabilities privately under coordinated disclosure.
+  - name: 📖 Documentation & Calculator Guide
+    url: https://github.com
+    about: Read our docs, formula breakdowns, and contribution guides.

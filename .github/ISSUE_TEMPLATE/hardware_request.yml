@@ -1,0 +1,67 @@
+name: 🖥️ Hardware / GPU Request
+description: Request addition of a new GPU, TPU, NPU, or accelerator profile
+title: "[Hardware]: Add "
+labels: ["hardware-data", "data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requesting new hardware specs to be added to the GPU Matchmaker database!
+
+  - type: input
+    id: hardware-name
+    attributes:
+      label: Hardware / Accelerator Model Name
+      description: What is the exact name of the hardware?
+      placeholder: "e.g., NVIDIA B200 SXM, AMD Instinct MI325X, Apple M4 Max 128GB"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: vendor
+    attributes:
+      label: Hardware Vendor
+      options:
+        - NVIDIA
+        - AMD
+        - Apple Silicon
+        - Intel (Gaudi / Arc)
+        - Google TPU
+        - Tenstorrent
+        - Qualcomm / Mobile NPU
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: vram-capacity
+    attributes:
+      label: VRAM / Unified Memory Capacity (GB)
+      placeholder: "e.g., 192 GB"
+    validations:
+      required: true
+
+  - type: input
+    id: memory-bandwidth
+    attributes:
+      label: Memory Bandwidth (GB/s) & Memory Type
+      placeholder: "e.g., 8.0 TB/s (HBM3e), 819 GB/s (GDDR6X)"
+    validations:
+      required: true
+
+  - type: input
+    id: tdp-power
+    attributes:
+      label: TDP / Power Draw (Watts)
+      placeholder: "e.g., 700W, 450W, 30W"
+    validations:
+      required: false
+
+  - type: textarea
+    id: source-reference
+    attributes:
+      label: Verification Source / Specification Link
+      description: Link to official vendor datasheet, press release, or whitepaper.
+      placeholder: "https://www.nvidia.com/... or https://www.amd.com/..."
+    validations:
+      required: true
