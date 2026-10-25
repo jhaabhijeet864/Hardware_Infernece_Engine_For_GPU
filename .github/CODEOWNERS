@@ -1,0 +1,14 @@
+# Default owners for all files in the repository
+* @abhijeetjha
+
+# GitHub configuration, issue templates, and CI workflows
+/.github/ @abhijeetjha
+
+# Documentation and community guidelines
+/docs/ @abhijeetjha
+*.md @abhijeetjha
+LICENSE @abhijeetjha
+
+# Core calculation logic and data definitions
+/src/lib/ @abhijeetjha
+/src/data/ @abhijeetjha
