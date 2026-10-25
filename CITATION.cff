@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software in your research or project evaluations, please cite it as below."
+title: "Hardware-Inference: LLM Hardware & VRAM Memory Calculator"
+authors:
+  - family-names: "Jha"
+    given-names: "Abhijeet"
+    alias: "abhijeetjha"
+version: 0.1.0
+date-released: 2026-10-25
+url: "https://github.com/abhijeetjha/Hardware-Inference"
+repository-code: "https://github.com/abhijeetjha/Hardware-Inference"
+license: MIT
+keywords:
+  - "large-language-models"
+  - "llm-inference"
+  - "vram-calculator"
+  - "gpu-memory"
+  - "quantization"
+  - "deep-learning-hardware"
+  - "distributed-training"
+  - "kv-cache"
