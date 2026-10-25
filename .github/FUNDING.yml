@@ -1,0 +1,12 @@
+# GitHub Sponsorship Configuration
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+github:
+  - abhijeetjha
+
+# Supported platforms (uncomment as applicable):
+# patreon: your_patreon_handle
+# open_collective: your_collective
+# ko_fi: your_kofi_handle
+# tidelift: npm/hardware-inference
+# custom: ['https://example.com/sponsor']
