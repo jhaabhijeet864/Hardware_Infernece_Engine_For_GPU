@@ -8,18 +8,41 @@ import {
   ShieldCheck,
   CheckCircle,
   XCircle,
+  Gear,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import {
+  OEMBrandingConfig,
+  DEFAULT_OEM_BRANDING,
+} from "@/lib/engine/branding";
+import { OEMBrandingModal } from "./OEMBrandingModal";
 import type { QualificationRunBundle } from "../../cli/bundle-builder";
 
 interface AcceptanceCertificateProps {
   bundle: QualificationRunBundle;
+  branding?: OEMBrandingConfig;
+  onBrandingChange?: (branding: OEMBrandingConfig) => void;
 }
 
-export const AcceptanceCertificate: React.FC<AcceptanceCertificateProps> = ({ bundle }) => {
+export const AcceptanceCertificate: React.FC<AcceptanceCertificateProps> = ({
+  bundle,
+  branding: externalBranding,
+  onBrandingChange,
+}) => {
+  const [internalBranding, setInternalBranding] = useState<OEMBrandingConfig>(
+    externalBranding || DEFAULT_OEM_BRANDING
+  );
+  const [isBrandingModalOpen, setIsBrandingModalOpen] = useState(false);
+
+  const branding = externalBranding || internalBranding;
+  const setBranding = (b: OEMBrandingConfig) => {
+    setInternalBranding(b);
+    onBrandingChange?.(b);
+  };
+
   const [serialNumber, setSerialNumber] = useState("SN-HW-4090-2026-X99");
-  const [inspectorName, setInspectorName] = useState("Lead AI Infrastructure Engineer");
-  const [partnerOrg, setPartnerOrg] = useState("Hardware Integration Facility");
+  const [inspectorName, setInspectorName] = useState(branding.certifierTitle);
+  const [partnerOrg, setPartnerOrg] = useState(branding.partnerName);
 
   const isPassed = bundle.qualification_verdict.overall === "PASSED";
 
@@ -55,6 +78,14 @@ export const AcceptanceCertificate: React.FC<AcceptanceCertificateProps> = ({ bu
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsBrandingModalOpen(true)}
+            className="px-3.5 py-2 text-xs font-medium rounded-lg bg-surface-dark hover:bg-surface-highlight border border-border text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+          >
+            <Gear size={14} />
+            <span>OEM Co-Branding</span>
+          </button>
+
           <button
             onClick={handleCopyHash}
             className="px-3.5 py-2 text-xs font-medium rounded-lg bg-surface-dark hover:bg-surface-highlight border border-border text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
@@ -92,15 +123,23 @@ export const AcceptanceCertificate: React.FC<AcceptanceCertificateProps> = ({ bu
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-border/60 print:border-slate-300">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="size-10 rounded-xl bg-gradient-to-br from-primary to-purple-800 flex items-center justify-center text-white print:bg-slate-900">
+                <div className="size-10 rounded-xl bg-gradient-to-br from-primary to-purple-800 flex items-center justify-center text-white print:bg-slate-900 shrink-0">
                   <ShieldCheck size={24} weight="duotone" />
                 </div>
                 <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-highlight border border-border text-cyan-300 print:text-blue-800 print:border-slate-400 uppercase tracking-widest font-bold">
+                      {branding.partnerName}
+                    </span>
+                    <span className="text-[10px] font-mono text-muted-foreground print:text-slate-600">
+                      • {branding.facilityLocation}
+                    </span>
+                  </div>
                   <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-white print:text-black">
                     Hardware Qualification Certificate
                   </h2>
                   <p className="text-xs text-muted-foreground font-mono print:text-slate-600">
-                    AI Workload Specification &amp; Machine Acceptance Protocol
+                    {branding.partnerTagline}
                   </p>
                 </div>
               </div>
@@ -364,6 +403,12 @@ export const AcceptanceCertificate: React.FC<AcceptanceCertificateProps> = ({ bu
               </div>
             </div>
 
+            {/* OEM Warranty & Performance Terms */}
+            <div className="p-3.5 rounded-xl bg-surface-highlight/40 border border-border/50 text-[11px] font-mono text-slate-300 print:bg-slate-50 print:border-slate-300 print:text-slate-700 mb-6">
+              <strong className="text-white print:text-black block mb-0.5">OEM Performance Warranty Terms:</strong>
+              {branding.warrantyClause}
+            </div>
+
             <div className="pt-4 flex flex-col sm:flex-row items-end sm:items-center justify-between gap-4 text-xs font-mono text-muted-foreground print:text-black">
               <div>
                 <p className="text-[11px]">
@@ -377,13 +422,20 @@ export const AcceptanceCertificate: React.FC<AcceptanceCertificateProps> = ({ bu
               <div className="text-right">
                 <div className="w-56 h-8 border-b border-white/40 print:border-black mb-1" />
                 <span className="text-[10px] uppercase tracking-wider block text-slate-400 print:text-black">
-                  Authorized Sign-Off Signature
+                  Authorized Sign-Off: {branding.certifierTitle}
                 </span>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <OEMBrandingModal
+        isOpen={isBrandingModalOpen}
+        branding={branding}
+        onSave={setBranding}
+        onClose={() => setIsBrandingModalOpen(false)}
+      />
     </div>
   );
 };
