@@ -186,8 +186,9 @@ export const GPU_OPTIONS: GPUOption[] = [
 export const PRECISION_OPTIONS = [
   { value: "fp32", label: "FP32 (32-bit)", bytesPerParam: 4 },
   { value: "fp16", label: "FP16 (16-bit)", bytesPerParam: 2 },
-  { value: "int8", label: "INT8 (8-bit)", bytesPerParam: 1 },
-  { value: "int4", label: "INT4 (4-bit)", bytesPerParam: 0.5 },
+  { value: "fp8", label: "FP8 (8-bit Float)", bytesPerParam: 1 },
+  { value: "int8", label: "INT8 (8-bit Integer)", bytesPerParam: 1 },
+  { value: "int4", label: "INT4 (4-bit / AWQ)", bytesPerParam: 0.5 },
 ]
 
 export const OPTIMIZER_OPTIONS = [

@@ -25,6 +25,10 @@ function generateQuantizationResults(modelSize: number): QuantizationResults {
         qualityRetention = 99.5
         speedup = 1.8
         break
+      case "fp8":
+        qualityRetention = 98.5
+        speedup = 2.2
+        break
       case "int8":
         qualityRetention = 97
         speedup = 2.5
@@ -140,20 +144,25 @@ export function QuantizationComparison() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {results.map((result, index) => (
                 <motion.div
                   key={result.precision}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
-                  className="p-6 rounded-lg border border-border bg-card/80 space-y-4"
+                  className="p-5 rounded-lg border border-border bg-card/80 space-y-4"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-lg">{result.label}</h3>
+                      <h3 className="font-semibold text-base">{result.label}</h3>
+                      {result.precision === "fp8" && (
+                        <Badge variant="secondary" className="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                          vLLM Standard
+                        </Badge>
+                      )}
                       {result.precision === "fp16" && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-[10px]">
                           Recommended
                         </Badge>
                       )}
@@ -166,8 +175,8 @@ export function QuantizationComparison() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Memory Savings</span>
-                        <span className="font-mono font-medium">
+                        <span className="text-muted-foreground text-xs">Memory Savings</span>
+                        <span className="font-mono font-medium text-xs">
                           {((1 - result.memory / baselineMemory) * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -176,16 +185,16 @@ export function QuantizationComparison() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Quality Retention</span>
-                        <span className="font-mono font-medium">{result.qualityRetention.toFixed(1)}%</span>
+                        <span className="text-muted-foreground text-xs">Quality Retention</span>
+                        <span className="font-mono font-medium text-xs">{result.qualityRetention.toFixed(1)}%</span>
                       </div>
                       <Progress value={result.qualityRetention} className="[&>div]:bg-green-500" />
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Speed Improvement</span>
-                        <span className="font-mono font-medium">{result.speedup}×</span>
+                        <span className="text-muted-foreground text-xs">Speed Improvement</span>
+                        <span className="font-mono font-medium text-xs">{result.speedup}×</span>
                       </div>
                       <Progress value={(result.speedup / 4) * 100} className="[&>div]:bg-blue-500" />
                     </div>
@@ -202,16 +211,14 @@ export function QuantizationComparison() {
                   training baseline.
                 </div>
                 <div>
-                  <strong className="text-accent">FP16:</strong> Negligible quality loss, 50% size reduction.
-                  Best for most use cases.
+                  <strong className="text-accent">FP16 / BF16:</strong> Zero quality loss, 50% size reduction.
+                  Best general-purpose serving.
                 </div>
                 <div>
-                  <strong className="text-accent">INT8:</strong> Good quality, 75% size reduction. Suitable
-                  for resource-constrained environments.
+                  <strong className="text-cyan-400">FP8:</strong> Modern datacenter standard (Ada Lovelace &amp; Hopper). Minimal quality loss with 2x throughput on Tensor Cores.
                 </div>
                 <div>
-                  <strong className="text-accent">INT4:</strong> Acceptable quality, 87.5% size reduction.
-                  Best for edge devices or limited VRAM.
+                  <strong className="text-accent">INT8 / INT4 (AWQ/GPTQ):</strong> Aggressive memory compression for edge devices or low-VRAM workstations.
                 </div>
               </div>
             </div>
