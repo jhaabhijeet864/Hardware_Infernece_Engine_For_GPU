@@ -184,17 +184,19 @@ export function captureSystemEnvironment(options?: CaptureOptions): SystemEnviro
   if (physicalGpuProbe && physicalGpuProbe.gpus.length > 0) {
     const primary = physicalGpuProbe.gpus[0];
     const cudaVer = queryCudaVersion();
-    const totalVramGiB = Number((primary.memory_total_mib / 1024).toFixed(2));
+    // Sum total VRAM across all physical GPUs in the machine
+    const totalMib = physicalGpuProbe.gpus.reduce((acc, g) => acc + g.memory_total_mib, 0);
+    const totalVramGiB = Number((totalMib / 1024).toFixed(2));
     const pcieLink = primary.pcie_gen && primary.pcie_width ? `Gen ${primary.pcie_gen} x${primary.pcie_width}` : "Gen 4 x16";
 
     const gpu: GpuEnvironmentSpec = {
-      model: primary.name,
+      model: physicalGpuProbe.gpus.length > 1 ? `${primary.name} (${physicalGpuProbe.gpus.length}x Multi-GPU)` : primary.name,
       count: physicalGpuProbe.gpus.length,
       total_vram_gib: totalVramGiB,
       driver_version: primary.driver_version,
       cuda_version: cudaVer,
       pcie_link: pcieLink,
-      power_limit_w: primary.power_limit_w,
+      power_limit_w: primary.power_limit_w * physicalGpuProbe.gpus.length,
       uuid: primary.uuid,
     };
 
@@ -204,6 +206,40 @@ export function captureSystemEnvironment(options?: CaptureOptions): SystemEnviro
       system_hash: computeSystemHash(gpu, host),
       is_simulated: false,
     };
+  }
+
+  // Probe Apple Silicon unified memory on macOS
+  if (host.platform === "darwin") {
+    try {
+      const brand = execSync("sysctl -n machdep.cpu.brand_string", {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        timeout: 2000,
+      }).trim();
+
+      if (brand.toLowerCase().includes("apple")) {
+        const unifiedRamGiB = host.ram_gib;
+        const gpu: GpuEnvironmentSpec = {
+          model: brand,
+          count: 1,
+          total_vram_gib: unifiedRamGiB,
+          driver_version: "Apple Metal Framework",
+          cuda_version: "Metal 3 (MPS)",
+          pcie_link: "Apple Silicon SoC Bus",
+          power_limit_w: 100,
+          uuid: `APPLE-M-SERIES-${crypto.createHash("md5").update(brand).digest("hex").slice(0, 8)}`,
+        };
+
+        return {
+          gpu,
+          host,
+          system_hash: computeSystemHash(gpu, host),
+          is_simulated: false,
+        };
+      }
+    } catch {
+      // Continue to default fallback
+    }
   }
 
   // Fallback when nvidia-smi is not available (e.g. CI, non-NVIDIA local dev)
