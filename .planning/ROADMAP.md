@@ -53,9 +53,9 @@
 ## Phase 5: Hardware Supplier Pilot & Partner Integration
 **Focus**: Test with a real hardware partner or target system (OEM workstation/server).
 
-- [ ] **5.1 Target Machine Matrix & Pilot Scenarios**:
+- [x] **5.1 Target Machine Matrix & Pilot Scenarios**:
   - Validate on target partner configuration (e.g., dual RTX 4090 or single A100/H100/L40S).
-- [ ] **5.2 Co-branded Qualification Template**:
+- [x] **5.2 Co-branded Qualification Template**:
   - Support OEM/Integrator branding for pre-sales and factory delivery reports.
-- [ ] **5.3 Deployment & Distribution Packaging**:
+- [x] **5.3 Deployment & Distribution Packaging**:
   - Production build and distribution instructions for local runner and web UI.
