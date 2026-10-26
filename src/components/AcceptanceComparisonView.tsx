@@ -3,7 +3,7 @@ import {
   CheckCircle,
   XCircle,
   Speedometer,
-  Activity,
+  Pulse,
   ArrowsLeftRight,
   ShieldCheck,
 } from "@phosphor-icons/react";
@@ -288,7 +288,7 @@ export const AcceptanceComparisonView: React.FC<AcceptanceComparisonViewProps> =
         <div className="p-6 rounded-2xl bg-card border border-border">
           <div className="flex items-center justify-between mb-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <Activity size={18} className="text-primary" />
+              <Pulse size={18} className="text-primary" />
               Inter-Token Latency (ITL / TPOT)
             </h4>
             <span

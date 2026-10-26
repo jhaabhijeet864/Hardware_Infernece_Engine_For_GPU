@@ -42,12 +42,12 @@
 ## Phase 4: Hardware Acceptance & Comparison Reports
 **Focus**: Deliver the commercial output—the reproducible qualification certificate and comparison report.
 
-- [ ] **4.1 Bundle Ingestion & Analytical vs. Measured Comparison**:
+- [x] **4.1 Bundle Ingestion & Analytical vs. Measured Comparison**:
   - Web UI capability to load or drag-and-drop `qualification-run.json`.
   - Visual delta view: Analytical memory prediction vs. actual measured memory and latency percentiles.
-- [ ] **4.2 SLA Pass/Fail Evaluator**:
+- [x] **4.2 SLA Pass/Fail Evaluator**:
   - Automated evaluation against defined workload targets (e.g. TTFT < 500ms, ITL < 30ms, 0 OOM errors).
-- [ ] **4.3 Exportable Hardware Acceptance Certificate**:
+- [x] **4.3 Exportable Hardware Acceptance Certificate**:
   - Print-ready PDF and clean HTML export featuring hardware details, test parameters, SLA results, and qualification sign-off.
 
 ## Phase 5: Hardware Supplier Pilot & Partner Integration
