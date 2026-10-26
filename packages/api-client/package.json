@@ -1,0 +1,27 @@
+{
+  "name": "@hardware-inference/api-client",
+  "version": "0.1.0",
+  "description": "Typed HTTP & auto-reconnecting WebSocket client SDK for Hardware-Inference",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@hardware-inference/protocol": "^0.1.0",
+    "@hardware-inference/types": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2"
+  }
+}
