@@ -1,0 +1,28 @@
+{
+  "name": "@hardware-inference/core",
+  "version": "0.1.0",
+  "description": "Zero-dependency analytical GPU sizing & KV-cache calculation engine",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "npx tsx __tests__/calculator.test.ts && npx tsx __tests__/workload.test.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@hardware-inference/types": "^0.1.0",
+    "@hardware-inference/protocol": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2"
+  }
+}

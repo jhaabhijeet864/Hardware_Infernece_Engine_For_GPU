@@ -1,0 +1,27 @@
+{
+  "name": "@hardware-inference/protocol",
+  "version": "0.1.0",
+  "description": "Zod schemas and communication contracts for the Hardware-Inference ecosystem",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@hardware-inference/types": "^0.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2"
+  }
+}
