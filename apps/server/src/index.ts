@@ -14,7 +14,8 @@ await fastify.register(cors, { origin: '*' });
 await fastify.register(websocket);
 
 // Active live WebSocket subscribers (Mobile apps listening to rig telemetry)
-const rigSubscribers = new Map<string, Set<any>>();
+type WebSocketConnection = { readyState: number; send: (data: string) => void };
+const rigSubscribers = new Map<string, Set<WebSocketConnection>>();
 const activePairingPins = new Map<string, { rigId: string; expiresAt: number }>();
 
 // 1. Healthcheck
@@ -154,7 +155,7 @@ fastify.register(async function (fastify) {
     if (!rigSubscribers.has(rigId)) {
       rigSubscribers.set(rigId, new Set());
     }
-    rigSubscribers.get(rigId)!.add(socket);
+    rigSubscribers.get(rigId)!.add(socket as unknown as WebSocketConnection);
 
     socket.on('close', () => {
       rigSubscribers.get(rigId)?.delete(socket);
