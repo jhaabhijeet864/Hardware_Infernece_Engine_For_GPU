@@ -31,12 +31,12 @@
 ## Phase 3: Local Benchmark Runner CLI (`hw-qual-cli`)
 **Focus**: Provide an executable tool to benchmark the physical machine against the specified workload.
 
-- [ ] **3.1 Environment Capture Module**:
+- [x] **3.1 Environment Capture Module**:
   - Collect GPU topology (model, count, total VRAM, bus), CPU, System RAM, OS, driver version, CUDA version.
-- [ ] **3.2 vLLM / Serving Adapter**:
+- [x] **3.2 vLLM / Serving Adapter**:
   - Script to configure and invoke `vllm bench serve` with matching workload parameters (prompt/gen lengths, concurrency).
   - Capture real-time GPU memory watermark and request latencies (TTFT, ITL, request latency, goodput).
-- [ ] **3.3 Output Bundle Generator**:
+- [x] **3.3 Output Bundle Generator**:
   - Package benchmark run into a structured `qualification-run.json` artifact containing full provenance, raw percentiles, and errors.
 
 ## Phase 4: Hardware Acceptance & Comparison Reports

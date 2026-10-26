@@ -4,12 +4,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "hw-qual": "bin/hw-qual.js"
+  },
   "scripts": {
     "dev": "vite",
     "kill": "fuser -k 5000/tcp",
     "build": "tsc -b --noCheck && vite build",
     "lint": "eslint .",
-    "test": "npx tsx src/lib/engine/__tests__/calculator.test.ts && npx tsx src/lib/engine/__tests__/workload.test.ts",
+    "hw-qual": "npx tsx src/cli/runner.ts",
+    "test": "npx tsx src/lib/engine/__tests__/calculator.test.ts && npx tsx src/lib/engine/__tests__/workload.test.ts && npx tsx src/cli/__tests__/env-capture.test.ts && npx tsx src/cli/__tests__/adapter.test.ts && npx tsx src/cli/__tests__/bundle.test.ts",
     "optimize": "vite optimize",
     "preview": "vite preview"
   },
