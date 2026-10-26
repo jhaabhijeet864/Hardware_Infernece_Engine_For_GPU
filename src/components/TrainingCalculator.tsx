@@ -18,7 +18,6 @@ import {
   TRAINING_METHODS,
   type TrainingParams,
 } from "@/lib/llm-calculations"
-import { motion } from "framer-motion"
 import { Progress } from "@/components/ui/progress"
 import { ExportButton } from "@/components/ExportButton"
 import type { ExportData } from "@/lib/export-utils"
@@ -50,75 +49,85 @@ export function TrainingCalculator() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-800/60 text-amber-200 text-xs flex items-start gap-2.5">
-        <Info size={18} className="text-amber-400 shrink-0 mt-0.5" weight="duotone" />
+    <div className="space-y-5">
+      <div className="p-3.5 rounded-lg bg-[#14120a] border border-amber-500/30 text-amber-200 text-xs font-mono flex items-start gap-2.5">
+        <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold text-amber-300 uppercase tracking-wide text-[10px] block mb-0.5">Experimental Estimation Mode</span>
-          Training memory requirements are theoretical analytical approximations. Actual memory varies significantly based on framework implementation (PyTorch FSDP / DeepSpeed ZeRO-3), activation checkpointing, and gradient accumulation sequence packing.
+          <span className="font-bold text-amber-300 uppercase tracking-wide text-[10px] block mb-0.5">
+            Experimental Analytical Estimation
+          </span>
+          Training memory requirements are analytical approximations. Actual memory varies based on framework execution (PyTorch FSDP / DeepSpeed ZeRO-3), activation checkpointing, and gradient accumulation sequence packing.
         </div>
       </div>
 
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightning size={24} className="text-accent" weight="duotone" />
-            Model Presets
+      <Card className="bg-[#11131a] border-border text-foreground">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+            <Lightning size={16} className="text-amber-400" />
+            <span>Model Presets</span>
           </CardTitle>
-          <CardDescription>Quick-select popular models for training</CardDescription>
+          <CardDescription className="text-xs text-muted-foreground font-mono">
+            Quick-select target parameter counts for training / fine-tuning
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 font-mono">
             {MODEL_PRESETS.slice(0, 6).map((preset) => (
               <button
                 key={preset.name}
                 onClick={() => handlePresetClick(preset)}
-                className={`px-4 py-2 rounded-lg border transition-all ${
+                className={`px-3 py-1.5 rounded border text-xs transition-colors cursor-pointer ${
                   params.parameters === preset.parameters
-                    ? "bg-accent text-accent-foreground border-accent"
-                    : "bg-card border-border hover:border-accent/50 text-foreground"
+                    ? "bg-[#181b24] text-white border-primary font-bold shadow-sm"
+                    : "bg-[#0e1017] border-border text-muted-foreground hover:text-white hover:border-slate-500"
                 }`}
               >
-                <div className="text-sm font-medium">{preset.name}</div>
-                <div className="text-xs opacity-70">{preset.parameters}B params</div>
+                <span className="font-semibold">{preset.name}</span>{" "}
+                <span className="text-[10px] text-muted-foreground">({preset.parameters}B)</span>
               </button>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle>Training Configuration</CardTitle>
-          <CardDescription>Configure parameters for training or fine-tuning</CardDescription>
+      <Card className="bg-[#11131a] border-border text-foreground">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Training Configuration</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground font-mono">
+            Configure fine-tuning hyperparameters and memory optimization techniques
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-5">
           <div className="space-y-2">
-            <Label>Training Method</Label>
+            <Label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+              Training Method
+            </Label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {TRAINING_METHODS.map((method) => (
                 <button
                   key={method.value}
                   onClick={() => setParams({ ...params, method: method.value })}
-                  className={`p-4 rounded-lg border transition-all text-left ${
+                  className={`p-3 rounded-lg border text-left transition-colors cursor-pointer ${
                     params.method === method.value
-                      ? "bg-accent text-accent-foreground border-accent"
-                      : "bg-card border-border hover:border-accent/50"
+                      ? "bg-[#181b24] border-primary text-foreground shadow-sm"
+                      : "bg-[#0e1017] border-border text-muted-foreground hover:border-slate-500 hover:text-white"
                   }`}
                 >
-                  <div className="font-semibold">{method.label}</div>
-                  <div className="text-xs opacity-70 mt-1">{method.description}</div>
+                  <div className="font-semibold text-xs text-foreground font-mono">{method.label}</div>
+                  <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+                    {method.description}
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-border" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="training-parameters" className="flex items-center gap-2">
-                Model Size (Billion Parameters)
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs font-mono">
+            <div className="space-y-1.5">
+              <Label htmlFor="training-parameters" className="text-muted-foreground uppercase text-[10px] tracking-wider">
+                Model Size (Billion Params)
               </Label>
               <Input
                 id="training-parameters"
@@ -127,20 +136,22 @@ export function TrainingCalculator() {
                 onChange={(e) => setParams({ ...params, parameters: parseFloat(e.target.value) || 0 })}
                 min={0.1}
                 step={0.1}
-                className="font-mono"
+                className="bg-[#0e1017] border-border font-mono text-xs"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="training-precision">Precision</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="training-precision" className="text-muted-foreground uppercase text-[10px] tracking-wider">
+                Precision
+              </Label>
               <Select
                 value={params.precision}
                 onValueChange={(value) => setParams({ ...params, precision: value })}
               >
-                <SelectTrigger id="training-precision">
+                <SelectTrigger id="training-precision" className="bg-[#0e1017] border-border font-mono text-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#11131a] border-border text-foreground font-mono text-xs">
                   {PRECISION_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -150,16 +161,18 @@ export function TrainingCalculator() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="optimizer">Optimizer</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="optimizer" className="text-muted-foreground uppercase text-[10px] tracking-wider">
+                Optimizer
+              </Label>
               <Select
                 value={params.optimizer}
                 onValueChange={(value) => setParams({ ...params, optimizer: value })}
               >
-                <SelectTrigger id="optimizer">
+                <SelectTrigger id="optimizer" className="bg-[#0e1017] border-border font-mono text-xs">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#11131a] border-border text-foreground font-mono text-xs">
                   {OPTIMIZER_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -169,16 +182,16 @@ export function TrainingCalculator() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="batchSize" className="flex items-center gap-2">
-                Batch Size
+            <div className="space-y-1.5">
+              <Label htmlFor="batchSize" className="text-muted-foreground uppercase text-[10px] tracking-wider flex items-center justify-between">
+                <span>Batch Size</span>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Info size={16} className="text-muted-foreground" />
+                      <Info size={12} className="text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs">Number of samples processed together per step</p>
+                    <TooltipContent className="bg-[#11131a] border-border text-foreground text-xs font-mono">
+                      Samples per micro-step
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -190,29 +203,17 @@ export function TrainingCalculator() {
                 onChange={(e) => setParams({ ...params, batchSize: parseInt(e.target.value) || 1 })}
                 min={1}
                 max={128}
-                className="font-mono"
+                className="bg-[#0e1017] border-border font-mono text-xs"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="gradientAccumulation" className="flex items-center gap-2">
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <Label htmlFor="gradientAccumulation" className="text-muted-foreground uppercase text-[10px] tracking-wider">
                 Gradient Accumulation Steps
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info size={16} className="text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs">
-                        Number of steps to accumulate gradients before updating weights
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </Label>
-              <span className="font-mono text-sm text-muted-foreground">{params.gradientAccumulation}</span>
+              <span className="text-foreground font-bold">{params.gradientAccumulation}</span>
             </div>
             <Slider
               id="gradientAccumulation"
@@ -221,120 +222,104 @@ export function TrainingCalculator() {
               min={1}
               max={32}
               step={1}
-              className="py-4"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>1</span>
-              <span>8</span>
-              <span>16</span>
-              <span>32</span>
-            </div>
           </div>
         </CardContent>
       </Card>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card className="border-accent/30 bg-card/50">
-          <CardHeader>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <CardTitle className="flex items-center gap-2">
-                  <Database size={24} className="text-accent" weight="duotone" />
-                  Training Memory Requirements
-                </CardTitle>
-                {trainingMethod && (
-                  <CardDescription>
-                    Using {trainingMethod.label}: {trainingMethod.description}
-                  </CardDescription>
-                )}
-              </div>
-              <ExportButton data={exportData} />
+      <Card className="bg-[#11131a] border-border text-foreground">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <Database size={16} className="text-primary" />
+                <span>Training Memory Footprint</span>
+              </CardTitle>
+              {trainingMethod && (
+                <CardDescription className="text-xs text-muted-foreground font-mono">
+                  Method: {trainingMethod.label} • {trainingMethod.description}
+                </CardDescription>
+              )}
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Model Weights</span>
-                <span className="font-mono font-medium">{formatMemory(memory.modelWeights)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Gradients</span>
-                <span className="font-mono font-medium">{formatMemory(memory.gradients || 0)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Optimizer States</span>
-                <span className="font-mono font-medium">{formatMemory(memory.optimizerStates || 0)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Activations</span>
-                <span className="font-mono font-medium">{formatMemory(memory.activations || 0)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Overhead</span>
-                <span className="font-mono font-medium">{formatMemory(memory.overhead)}</span>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold">Total VRAM Required</span>
-                <span className="font-mono text-2xl font-bold text-accent">
+            <ExportButton data={exportData} />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2.5 font-mono text-xs">
+            <div className="flex items-center justify-between p-2 rounded bg-[#0e1017] border border-border">
+              <span className="text-muted-foreground">Model Weights</span>
+              <span className="font-bold text-foreground">{formatMemory(memory.modelWeights)}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded bg-[#0e1017] border border-border">
+              <span className="text-muted-foreground">Gradients</span>
+              <span className="font-bold text-foreground">{formatMemory(memory.gradients || 0)}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded bg-[#0e1017] border border-border">
+              <span className="text-muted-foreground">Optimizer States</span>
+              <span className="font-bold text-foreground">{formatMemory(memory.optimizerStates || 0)}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded bg-[#0e1017] border border-border">
+              <span className="text-muted-foreground">Activations</span>
+              <span className="font-bold text-foreground">{formatMemory(memory.activations || 0)}</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded bg-[#0e1017] border border-border">
+              <span className="text-muted-foreground">CUDA &amp; Runtime Overhead</span>
+              <span className="font-bold text-foreground">{formatMemory(memory.overhead)}</span>
+            </div>
+
+            <div className="pt-2">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-[#181b24] border border-border">
+                <span className="text-sm font-semibold text-foreground">Total VRAM Required</span>
+                <span className="font-mono text-xl font-bold text-primary">
                   {formatMemory(memory.total)}
                 </span>
               </div>
             </div>
+          </div>
 
-            {recommendedGPUs.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Recommended GPUs</h4>
-                  <div className="space-y-2">
-                    {recommendedGPUs.map((gpu) => (
-                      <div
-                        key={gpu.name}
-                        className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border/50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{gpu.name}</span>
-                          <Badge variant="outline" className="font-mono text-xs">
-                            {gpu.vram} GB
-                          </Badge>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {gpu.tier}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  {recommendedGPUs.length > 0 && (
-                    <div className="space-y-2 pt-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Memory Usage</span>
-                        <span className="font-mono">
-                          {((memory.total / recommendedGPUs[0].vram) * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                      <Progress value={(memory.total / recommendedGPUs[0].vram) * 100} />
+          {recommendedGPUs.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+                Matching Hardware Configurations
+              </h4>
+              <div className="space-y-2">
+                {recommendedGPUs.map((gpu) => (
+                  <div
+                    key={gpu.name}
+                    className="flex items-center justify-between p-2.5 rounded-lg bg-[#0e1017] border border-border"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xs font-medium text-foreground">{gpu.name}</span>
+                      <Badge variant="outline" className="font-mono text-[10px] bg-[#181b24] border-border text-slate-300">
+                        {gpu.vram} GB
+                      </Badge>
                     </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {recommendedGPUs.length === 0 && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-center">
-                <p className="text-sm text-destructive">
-                  This configuration requires more VRAM than common GPUs. Try LoRA/QLoRA or reduce batch
-                  size.
-                </p>
+                    <Badge variant="secondary" className="text-[10px] font-mono bg-[#181b24] text-muted-foreground">
+                      {gpu.tier}
+                    </Badge>
+                  </div>
+                ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+
+              <div className="space-y-1.5 pt-2">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-muted-foreground">Primary GPU Memory Occupancy</span>
+                  <span className="font-bold text-foreground">
+                    {((memory.total / recommendedGPUs[0].vram) * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <Progress value={(memory.total / recommendedGPUs[0].vram) * 100} />
+              </div>
+            </div>
+          )}
+
+          {recommendedGPUs.length === 0 && (
+            <div className="p-3.5 rounded-lg bg-red-950/20 border border-red-500/30 text-center font-mono text-xs text-red-300">
+              Configuration exceeds single GPU memory limits. Switch to LoRA/QLoRA or apply DeepSpeed ZeRO-3 offloading.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
