@@ -42,13 +42,14 @@ Existing calculators only ask "Does an 8B model fit in 24 GB VRAM?", which ignor
 - ✓ GPU catalog database and card renderers — existing
 - ✓ Responsive dark theme with Tailwind CSS & Radix UI primitives — existing
 
-### Active (Qualification Platform Scope)
-- [ ] **Engine Isolation**: Extract memory math into an isolated, unit-tested module with strict typing and architectural metadata.
-- [ ] **Exact KV Math**: Implement $2 \times L \times H_{\text{KV}} \times D_{\text{head}} \times T \times B \times s$ with explicit support for Multi-Head Attention (MHA), Grouped-Query Attention (GQA), and Multi-Query Attention (MQA).
-- [ ] **Status Classification**: Replace arbitrary confidence with explicit states: `Analytical Estimate`, `Calibrated Estimate`, `Measured Result`, `Unsupported`.
-- [ ] **Workload Specification**: UI and schema capturing model revision, input/output token lengths, concurrent requests (vs total users), arrival rate, and target SLA (TTFT / ITL).
-- [ ] **Benchmark Adapter**: Local CLI script capable of executing `vllm bench serve` or equivalent, recording driver/hardware specs, latencies, and memory.
-- [ ] **Acceptance Report Generator**: Standardized report generator providing hardware qualification pass/fail status and audit trail.
+### Completed in Milestone 1 (Qualification Platform Foundation)
+- [x] **Engine Isolation**: Extract memory math into an isolated, unit-tested module with strict typing and architectural metadata.
+- [x] **Exact KV Math**: Implement $2 \times L \times H_{\text{KV}} \times D_{\text{head}} \times T \times B \times s$ with explicit support for Multi-Head Attention (MHA), Grouped-Query Attention (GQA), Multi-Query Attention (MQA), and MLA.
+- [x] **Status Classification**: Replace arbitrary confidence with explicit states: `Analytical Estimate`, `Calibrated Estimate`, `Measured Result`, `Unsupported`.
+- [x] **Workload Specification**: UI and schema capturing model revision, input/output token lengths, concurrent requests (vs total users), arrival rate, and target SLA (TTFT / ITL).
+- [x] **Benchmark Adapter**: Local CLI script capable of executing `vllm bench serve` or equivalent, recording driver/hardware specs, latencies, and memory.
+- [x] **Acceptance Report Generator**: Standardized report generator providing hardware qualification pass/fail status and audit trail.
+- [x] **OEM Partner Matrix & Co-Branding**: Hardware partner machine profiles, customizable delivery certificates, and factory test station runbook.
 
 ### Out of Scope (For Initial Qualification Milestone)
 - Full-scale distributed multi-node cluster benchmarking (focus on single-node workstation/server first).
