@@ -1,6 +1,4 @@
-import { useEffect, useRef } from 'react'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { TriangleAlert, Timer, Cpu } from 'lucide-react'
+import { TriangleAlert, Cpu } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import type { MemoryBreakdown } from '@/lib/types'
 import { EnhancedMemoryBreakdown } from '@/lib/calculator'
@@ -11,38 +9,16 @@ interface ResultsDisplayProps {
   workloadSizing?: WorkloadMemorySizing
 }
 
-function AnimatedNumber({ value }: { value: number }) {
-  const motionValue = useMotionValue(value)
-  const springValue = useSpring(motionValue, { stiffness: 300, damping: 30 })
-  const displayValue = useTransform(springValue, (v) => v.toFixed(2))
-  const ref = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    motionValue.set(value)
-  }, [value, motionValue])
-
-  useEffect(() => {
-    return displayValue.on('change', (v) => {
-      if (ref.current) {
-        ref.current.textContent = v
-      }
-    })
-  }, [displayValue])
-
-  return <span ref={ref}>{value.toFixed(2)}</span>
-}
-
 export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDisplayProps) {
   const totalGiB = workloadSizing ? workloadSizing.typicalMemory.totalVRAMRequiredGiB : memoryBreakdown.total
   const peakGiB = workloadSizing ? workloadSizing.peakMemory.totalVRAMRequiredGiB : undefined
   const tp = workloadSizing?.typicalMemory.tensorParallelSize ?? 1
   const perGpuPeak = workloadSizing?.peakMemory.perGpuVRAMRequiredGiB
 
-  // Warn if single GPU execution exceeds 80 GiB
   const showSingleGpuWarning = tp === 1 && totalGiB > 80
   const enhanced = memoryBreakdown as EnhancedMemoryBreakdown
   const status = enhanced.status || 'Analytical Estimate'
-  const decimalGB = (totalGiB * 1.07374).toFixed(2)
+  const decimalGB = (totalGiB * 1.07374).toFixed(1)
 
   const weights = workloadSizing ? workloadSizing.typicalMemory.weightsGiB : memoryBreakdown.modelWeights
   const kvCache = workloadSizing ? workloadSizing.typicalMemory.kvCacheGiB : memoryBreakdown.kvCache
@@ -50,118 +26,123 @@ export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDispl
     ? parseFloat((workloadSizing.typicalMemory.activationOverheadGiB + workloadSizing.typicalMemory.cudaContextGiB).toFixed(2))
     : memoryBreakdown.overhead
 
+  // Calculate percentages for segmented bar
+  const totalSafe = Math.max(0.1, totalGiB)
+  const pctWeights = Math.min(100, Math.max(5, (weights / totalSafe) * 100))
+  const pctKv = Math.min(100 - pctWeights, Math.max(5, (kvCache / totalSafe) * 100))
+  const pctOverhead = Math.max(0, 100 - pctWeights - pctKv)
+
+  // Standard GPU envelope classification
+  const requiredTarget = tp > 1 && perGpuPeak ? perGpuPeak : (peakGiB ?? totalGiB)
+  let envelopeLabel = 'Fits Consumer 24GB'
+  let envelopeColor = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+  if (requiredTarget > 80) {
+    envelopeLabel = 'Requires Multi-Node or TP ≥ 4'
+    envelopeColor = 'text-red-400 bg-red-500/10 border-red-500/20'
+  } else if (requiredTarget > 48) {
+    envelopeLabel = 'Requires 80GB Datacenter GPU'
+    envelopeColor = 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+  } else if (requiredTarget > 24) {
+    envelopeLabel = 'Requires 48GB Workstation GPU'
+    envelopeColor = 'text-sky-400 bg-sky-500/10 border-sky-500/20'
+  }
+
   return (
-    <section className="bg-gradient-to-b from-border to-card/50 p-[1px] rounded-2xl shadow-2xl relative overflow-hidden group">
-      <div className="absolute inset-0 bg-gradient-to-tr from-accent/20 via-transparent to-primary/20 opacity-50" />
-      <div className="bg-card relative rounded-[15px] p-6 h-full flex flex-col">
-        {/* Header Badge */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <span>Qualification Pre-Check</span>
-            {tp > 1 && (
-              <span className="text-[10px] px-2 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">
-                TP={tp} Cluster
-              </span>
-            )}
+    <section className="bg-[#11131a] p-5 sm:p-6 rounded-xl border border-border flex flex-col justify-between space-y-5">
+      {/* Top Header Badge */}
+      <div className="flex justify-between items-center pb-3 border-b border-border">
+        <div className="flex items-center gap-2">
+          <h3 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider">
+            Memory Footprint Telemetry
           </h3>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
-            <span className="size-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            {status}
+          {tp > 1 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#181b24] text-primary border border-border font-mono font-medium">
+              TP={tp} Cluster
+            </span>
+          )}
+        </div>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-[#181b24] text-slate-300 border border-border">
+          <span className="size-1.5 rounded-full bg-emerald-400" />
+          {status}
+        </span>
+      </div>
+
+      {showSingleGpuWarning && (
+        <Alert className="border-amber-500/30 bg-amber-500/10 text-amber-300">
+          <TriangleAlert className="size-4" />
+          <AlertTitle className="text-xs font-bold font-mono">Exceeds Single GPU Capacity</AlertTitle>
+          <AlertDescription className="text-amber-200/80 text-[11px] font-mono">
+            Workload requires {totalGiB.toFixed(1)} GiB, exceeding standard single GPU VRAM. Multi-GPU Tensor Parallelism (TP ≥ 2) is required.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Primary Readout */}
+      <div className="text-center py-2">
+        <div className="text-4xl sm:text-5xl font-mono font-bold text-foreground tracking-tight flex items-baseline justify-center gap-2">
+          <span>{totalGiB.toFixed(2)}</span>
+          <span className="text-lg font-normal text-muted-foreground font-mono">GiB</span>
+        </div>
+        <p className="text-xs text-muted-foreground font-mono mt-1">
+          Typical Operating VRAM (P50) ≈ <strong className="text-slate-300">{decimalGB} GB</strong>
+        </p>
+
+        {tp > 1 && perGpuPeak && (
+          <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#181b24] border border-border text-xs font-mono text-slate-300">
+            <Cpu size={13} className="text-primary" />
+            <span>Per-GPU Allocation: <strong className="text-white">{perGpuPeak.toFixed(1)} GiB / GPU</strong></span>
+          </div>
+        )}
+
+        {peakGiB && (
+          <div className="mt-2 text-[11px] font-mono text-slate-400">
+            Peak Stress Bound (P99): <strong className="text-foreground">{peakGiB.toFixed(2)} GiB</strong>
+          </div>
+        )}
+      </div>
+
+      {/* Segmented Memory Progress Bar */}
+      <div className="space-y-1.5">
+        <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
+          <span>VRAM Allocation Breakdown</span>
+          <span className="text-foreground font-semibold">{totalGiB.toFixed(1)} GiB</span>
+        </div>
+        <div className="h-3 w-full rounded overflow-hidden flex bg-[#181b24] border border-border">
+          <div
+            style={{ width: `${pctWeights}%` }}
+            className="bg-sky-400 transition-all duration-300"
+            title={`Weights: ${weights.toFixed(1)} GiB (${pctWeights.toFixed(0)}%)`}
+          />
+          <div
+            style={{ width: `${pctKv}%` }}
+            className="bg-indigo-400 transition-all duration-300"
+            title={`KV Cache: ${kvCache.toFixed(1)} GiB (${pctKv.toFixed(0)}%)`}
+          />
+          <div
+            style={{ width: `${pctOverhead}%` }}
+            className="bg-purple-400 transition-all duration-300"
+            title={`Overhead: ${overhead.toFixed(1)} GiB (${pctOverhead.toFixed(0)}%)`}
+          />
+        </div>
+        <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground pt-1">
+          <span className="flex items-center gap-1">
+            <span className="size-2 rounded-full bg-sky-400" /> Weights ({weights.toFixed(1)}G)
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="size-2 rounded-full bg-indigo-400" /> KV Cache ({kvCache.toFixed(1)}G)
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="size-2 rounded-full bg-purple-400" /> Overhead ({overhead.toFixed(1)}G)
           </span>
         </div>
+      </div>
 
-        {showSingleGpuWarning && (
-          <Alert className="mb-4 border-amber-500 bg-amber-500/10 text-amber-300">
-            <TriangleAlert className="size-4" />
-            <AlertTitle>Exceeds Single GPU Capacity</AlertTitle>
-            <AlertDescription className="text-amber-200/80 text-xs">
-              Workload requires {totalGiB.toFixed(1)} GiB, exceeding the largest single datacenter GPU (80–141 GiB). Switch to Multi-GPU (TP ≥ 2 or TP=4) in the Workload Builder.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {/* Primary Sizing Display */}
-        <div
-          aria-live="polite"
-          aria-atomic="true"
-          className="flex flex-col items-center justify-center py-4 mb-4 relative text-center"
-        >
-          <motion.div
-            key={totalGiB}
-            initial={{ scale: 1.05, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="text-5xl sm:text-6xl font-mono font-bold text-white relative z-10 flex items-baseline gap-2 result-glow"
-            aria-label={`${totalGiB} gibibytes total VRAM required`}
-          >
-            <span className="text-accent">
-              <AnimatedNumber value={totalGiB} />
-            </span>
-            <span className="text-xl text-muted-foreground font-normal" aria-hidden="true">GiB</span>
-          </motion.div>
-          <p className="text-muted-foreground text-xs mt-1">
-            Typical Operating Memory (P50) ≈ <span className="font-mono text-slate-300">{decimalGB} GB</span>
-          </p>
-
-          {tp > 1 && perGpuPeak && (
-            <div className="mt-2 text-[11px] font-mono text-cyan-300 bg-cyan-950/50 px-2.5 py-0.5 rounded-full border border-cyan-800/50 flex items-center gap-1.5">
-              <Cpu size={12} />
-              <span>Per-GPU Allocation: <strong>{perGpuPeak.toFixed(1)} GiB / GPU</strong> (Across {tp} GPUs)</span>
-            </div>
-          )}
-
-          {peakGiB && (
-            <div className="mt-2 text-[11px] font-mono text-amber-400/90 bg-amber-950/30 px-2.5 py-0.5 rounded-full border border-amber-800/40">
-              Peak Stress Bound (P99): <span className="font-bold text-amber-300">{peakGiB} GiB Total</span>
-            </div>
-          )}
-          
-          <div className="absolute inset-0 border border-accent/10 rounded-full scale-150 opacity-20 animate-pulse" aria-hidden="true" />
-        </div>
-        
-        {/* Memory Breakdown */}
-        <div className="space-y-2 mt-auto">
-          <div className="flex justify-between items-center p-2 rounded-lg bg-surface-highlight border border-border">
-            <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-primary" aria-hidden="true" />
-              <span className="text-xs text-card-foreground">Model Weights</span>
-            </div>
-            <span className="font-mono text-white font-bold text-xs">{weights} GiB</span>
-          </div>
-          
-          <div className="flex justify-between items-center p-2 rounded-lg bg-surface-highlight border border-border">
-            <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-accent" aria-hidden="true" />
-              <span className="text-xs text-card-foreground">KV Cache (Context)</span>
-            </div>
-            <span className="font-mono text-white font-bold text-xs">{kvCache} GiB</span>
-          </div>
-          
-          <div className="flex justify-between items-center p-2 rounded-lg bg-surface-highlight border border-border">
-            <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-pink-500" aria-hidden="true" />
-              <span className="text-xs text-card-foreground">CUDA Context &amp; Buffer</span>
-            </div>
-            <span className="font-mono text-white font-bold text-xs">{overhead} GiB</span>
-          </div>
-
-          {workloadSizing && (
-            <div className="p-2.5 rounded-lg bg-slate-900/70 border border-border/80 text-[11px] text-muted-foreground space-y-1.5 mt-2">
-              <div className="flex items-center justify-between text-slate-300 font-medium">
-                <span className="flex items-center gap-1.5">
-                  <Timer size={13} className="text-cyan-400" />
-                  Target SLA Criteria
-                </span>
-                <span className="text-[10px] text-emerald-400 font-mono">
-                  TTFT &lt; {workloadSizing.workload.sla.maxTtftMs}ms • ITL &lt; {workloadSizing.workload.sla.maxItlMs}ms
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-normal">
-                {workloadSizing.qualificationRecommendation}
-              </p>
-            </div>
-          )}
-        </div>
+      {/* Hardware Envelope Badge */}
+      <div className="pt-3 border-t border-border flex items-center justify-between text-xs font-mono">
+        <span className="text-muted-foreground">Hardware Ceiling:</span>
+        <span className={`px-2 py-0.5 rounded border text-[11px] font-semibold ${envelopeColor}`}>
+          {envelopeLabel}
+        </span>
       </div>
     </section>
   )

@@ -6,9 +6,9 @@ import {
   Check,
   Users,
   Timer,
-  Sparkle,
   Cpu,
   Desktop,
+  TerminalWindow,
 } from '@phosphor-icons/react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -44,7 +44,7 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
 
   const handleArchetypeSelect = (archetype: WorkloadSpecification) => {
     onChange({ ...archetype })
-    toast.success(`Loaded archetype: ${archetype.name}`)
+    toast.success(`Loaded profile: ${archetype.name}`)
   }
 
   const handlePartnerRigSelect = (rigId: string) => {
@@ -60,32 +60,32 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
         maxItlMs: rig.targetSlaGuidance.expectedItlMs * 1.5,
       },
     })
-    toast.success(`Aligned to partner rig: ${rig.name} (${rig.gpu.count}x GPU, TP=${rig.gpu.count})`)
+    toast.success(`Aligned to rig: ${rig.name} (${rig.gpu.count}x GPU, TP=${rig.gpu.count})`)
   }
 
   const handleCopyCommand = () => {
     navigator.clipboard.writeText(bundle.runnerTarget.cliCommand)
     setCopied(true)
-    toast.success('Copied vLLM bench serve command to clipboard!')
+    toast.success('Copied vLLM bench command to clipboard')
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleExportJson = () => {
     downloadJsonFile(`workload-${workload.id}-spec.json`, bundle)
-    toast.success(`Exported ${workload.id}-spec.json for hardware validation!`)
+    toast.success(`Exported ${workload.id}-spec.json`)
   }
 
   return (
-    <section className="glass-panel p-6 rounded-2xl flex-1 flex flex-col space-y-6">
+    <section className="bg-[#11131a] p-5 sm:p-6 rounded-xl border border-border flex flex-col space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-border">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <SlidersHorizontal size={20} weight="duotone" className="text-primary" />
+          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <SlidersHorizontal size={18} className="text-primary" />
             Workload Specification
           </h2>
-          <p className="text-xs text-muted-foreground">
-            Configure empirical serving parameters, sequence distributions, and target SLAs
+          <p className="text-xs text-muted-foreground font-mono">
+            Analytical parameters, concurrency models, and empirical serving constraints
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -93,38 +93,38 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
             variant="outline"
             size="sm"
             onClick={handleCopyCommand}
-            className="text-xs border-border/80 bg-surface-highlight hover:bg-surface-highlight/80 text-white"
+            className="text-xs font-mono border-border bg-[#181b24] hover:bg-[#202532] text-foreground"
           >
-            {copied ? <Check size={14} className="text-emerald-400 mr-1" /> : <Copy size={14} className="mr-1" />}
+            {copied ? <Check size={13} className="text-emerald-400 mr-1.5" /> : <Copy size={13} className="mr-1.5" />}
             Copy CLI
           </Button>
           <Button
             size="sm"
             onClick={handleExportJson}
-            className="text-xs bg-primary hover:bg-primary/90 text-white font-medium"
+            className="text-xs font-mono bg-primary hover:bg-sky-400 text-black font-semibold"
           >
-            <DownloadSimple size={14} className="mr-1" />
-            Export Benchmark Spec
+            <DownloadSimple size={13} className="mr-1.5" />
+            Export Spec
           </Button>
         </div>
       </div>
 
       {/* Enterprise Archetypes */}
       <div>
-        <div className="flex justify-between items-center mb-2.5">
-          <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
-            Enterprise Workload Archetypes
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-2.5">
+          <Label className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider block">
+            Workload Deployment Profiles
           </Label>
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
             <Desktop size={14} className="text-primary" />
             <span>Target Rig:</span>
             <select
               aria-label="Partner Machine Rig"
-              className="bg-surface-highlight border border-border/80 text-white text-[11px] rounded px-2 py-0.5 font-mono cursor-pointer"
+              className="bg-[#181b24] border border-border text-foreground text-xs rounded px-2 py-0.5 font-mono cursor-pointer"
               onChange={(e) => handlePartnerRigSelect(e.target.value)}
               defaultValue=""
             >
-              <option value="" disabled>Select Partner Rig</option>
+              <option value="" disabled>Select Rig Template</option>
               {PARTNER_MACHINE_PROFILES.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.gpu.count}x GPU • {p.gpu.totalVramGiB} GiB)
@@ -133,7 +133,7 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
             </select>
           </div>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           {WORKLOAD_ARCHETYPES.map((arch) => {
             const isSelected = workload.id === arch.id
             return (
@@ -141,23 +141,23 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
                 key={arch.id}
                 type="button"
                 onClick={() => handleArchetypeSelect(arch)}
-                className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden group ${
+                className={`p-3 rounded-lg border text-left transition-all relative cursor-pointer ${
                   isSelected
-                    ? 'bg-primary/15 border-primary text-white shadow-lg shadow-primary/10'
-                    : 'bg-card border-border/80 text-slate-300 hover:border-slate-500 hover:bg-surface-highlight'
+                    ? 'bg-[#181b25] border-primary text-foreground shadow-sm'
+                    : 'bg-[#13151e] border-border text-slate-300 hover:border-slate-500 hover:bg-[#161924]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-xs truncate">{arch.name}</span>
-                  {isSelected && <Sparkle size={13} weight="fill" className="text-primary shrink-0 ml-1" />}
+                  <span className="font-semibold text-xs truncate">{arch.name}</span>
+                  {isSelected && <span className="size-1.5 rounded-full bg-primary shrink-0 ml-1" />}
                 </div>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 leading-relaxed">
+                <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed mb-2">
                   {arch.description}
                 </p>
-                <div className="flex items-center gap-2 text-[9px] font-mono text-cyan-400 mt-2">
-                  <span>Conc: {arch.concurrency}</span>
+                <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400 border-t border-border/50 pt-1.5">
+                  <span>Batch: <strong className="text-foreground">{arch.concurrency}</strong></span>
                   <span>•</span>
-                  <span>P50: {arch.promptTokensP50 + arch.generationTokensP50}t</span>
+                  <span>P50: <strong className="text-foreground">{arch.promptTokensP50 + arch.generationTokensP50}t</strong></span>
                 </div>
               </button>
             )
@@ -166,11 +166,11 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
       </div>
 
       {/* Model, Runtime, and Precisions Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Model Selection */}
         <div>
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-            Target Architecture
+          <Label className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            Model Architecture
           </Label>
           <Select
             value={workload.modelId}
@@ -185,10 +185,10 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
               })
             }}
           >
-            <SelectTrigger className="w-full bg-surface-highlight border-border rounded-lg text-white font-mono text-xs">
+            <SelectTrigger className="w-full bg-[#181b24] border-border rounded-md text-foreground font-mono text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#11131a] border-border text-foreground">
               {Object.values(MODEL_REGISTRY).map((m) => (
                 <SelectItem key={m.id} value={m.id} className="font-mono text-xs">
                   {m.name} ({m.paramCountTotalB}B • {m.attentionType})
@@ -197,7 +197,7 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
             </SelectContent>
           </Select>
           {activeModel && (
-            <p className="text-[10px] text-muted-foreground mt-1.5 font-mono truncate">
+            <p className="text-[10px] text-muted-foreground mt-1 font-mono truncate">
               {activeModel.numLayers}L • {activeModel.numKeyValueHeads} KV • {activeModel.headDimension}d
             </p>
           )}
@@ -205,41 +205,41 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
 
         {/* Runtime Selection */}
         <div>
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-            Serving Engine
+          <Label className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            Serving Runtime
           </Label>
           <Select
             value={workload.runtime}
             onValueChange={(val) => onChange({ ...workload, runtime: val as ServingRuntime })}
           >
-            <SelectTrigger className="w-full bg-surface-highlight border-border rounded-lg text-white font-mono text-xs">
+            <SelectTrigger className="w-full bg-[#181b24] border-border rounded-md text-foreground font-mono text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#11131a] border-border text-foreground">
               <SelectItem value="vllm" className="font-mono text-xs">vLLM (PagedAttention)</SelectItem>
               <SelectItem value="tensorrt-llm" className="font-mono text-xs">TensorRT-LLM (Low Latency)</SelectItem>
               <SelectItem value="ollama" className="font-mono text-xs">Ollama / llama.cpp</SelectItem>
               <SelectItem value="tgi" className="font-mono text-xs">HuggingFace TGI</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-[10px] text-muted-foreground mt-1.5 font-mono">
-            Adapter: vllm bench serve
+          <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+            CLI: vllm bench serve
           </p>
         </div>
 
         {/* Weight Precision */}
         <div>
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+          <Label className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
             Weight Precision
           </Label>
           <Select
             value={workload.precision}
             onValueChange={(val) => onChange({ ...workload, precision: val as PrecisionFormat })}
           >
-            <SelectTrigger className="w-full bg-surface-highlight border-border rounded-lg text-white font-mono text-xs">
+            <SelectTrigger className="w-full bg-[#181b24] border-border rounded-md text-foreground font-mono text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#11131a] border-border text-foreground">
               <SelectItem value="FP16" className="font-mono text-xs">FP16 (2 bytes/param)</SelectItem>
               <SelectItem value="BF16" className="font-mono text-xs">BF16 (2 bytes/param)</SelectItem>
               <SelectItem value="INT8" className="font-mono text-xs">INT8 (1 byte/param)</SelectItem>
@@ -247,51 +247,51 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
               <SelectItem value="INT4" className="font-mono text-xs">INT4 / AWQ (0.5 bytes)</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-[10px] text-muted-foreground mt-1.5 font-mono">
+          <p className="text-[10px] text-muted-foreground mt-1 font-mono">
             Weights: {sizing.typicalMemory.weightsGiB.toFixed(1)} GiB
           </p>
         </div>
 
-        {/* KV Cache Precision Selection */}
+        {/* KV Cache Precision */}
         <div>
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
+          <Label className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
             KV Cache Precision
           </Label>
           <Select
             value={workload.kvCachePrecision}
             onValueChange={(val) => onChange({ ...workload, kvCachePrecision: val as PrecisionFormat })}
           >
-            <SelectTrigger className="w-full bg-surface-highlight border-border rounded-lg text-white font-mono text-xs">
+            <SelectTrigger className="w-full bg-[#181b24] border-border rounded-md text-foreground font-mono text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="FP16" className="font-mono text-xs">FP16 (Full Precision KV)</SelectItem>
+            <SelectContent className="bg-[#11131a] border-border text-foreground">
+              <SelectItem value="FP16" className="font-mono text-xs">FP16 (Full Precision)</SelectItem>
               <SelectItem value="BF16" className="font-mono text-xs">BF16 (16-bit KV)</SelectItem>
-              <SelectItem value="FP8" className="font-mono text-xs">FP8 (vLLM --kv-cache-dtype fp8)</SelectItem>
-              <SelectItem value="INT8" className="font-mono text-xs">INT8 (Quantized 8-bit KV)</SelectItem>
+              <SelectItem value="FP8" className="font-mono text-xs">FP8 (Paged Cache fp8)</SelectItem>
+              <SelectItem value="INT8" className="font-mono text-xs">INT8 (Quantized KV)</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-[10px] text-muted-foreground mt-1.5 font-mono text-cyan-400">
-            KV Cache: {sizing.typicalMemory.kvCacheGiB.toFixed(2)} GiB
+          <p className="text-[10px] text-muted-foreground mt-1 font-mono text-slate-400">
+            KV: {sizing.typicalMemory.kvCacheGiB.toFixed(2)} GiB
           </p>
         </div>
       </div>
 
       {/* Tensor Parallelism (TP) Cluster Configuration */}
-      <div className="p-4 rounded-xl bg-card border border-border/80 space-y-3">
-        <div className="flex justify-between items-center">
+      <div className="p-3.5 rounded-lg bg-[#0e1017] border border-border space-y-3">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1.5">
           <div className="flex items-center gap-2">
-            <Cpu size={18} className="text-cyan-400" weight="duotone" />
-            <Label className="text-xs font-bold text-white uppercase tracking-wider">
+            <Cpu size={16} className="text-primary" />
+            <Label className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider">
               Tensor Parallelism Shard (TP GPUs)
             </Label>
             {isLargeModel && currentTp === 1 && (
-              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">
-                Recommendation: TP ≥ 2 for {activeModel?.name}
+              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-mono">
+                TP ≥ 2 Recommended
               </span>
             )}
           </div>
-          <span className="font-mono font-bold text-cyan-300 text-sm bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/60">
+          <span className="font-mono text-xs text-slate-300">
             TP = {currentTp} {currentTp > 1 ? `(${currentTp}x Multi-GPU)` : '(Single GPU)'}
           </span>
         </div>
@@ -304,14 +304,14 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
                 key={tpOption}
                 type="button"
                 onClick={() => onChange({ ...workload, tensorParallelSize: tpOption })}
-                className={`py-2 px-3 rounded-lg border text-xs font-mono font-bold transition-all ${
+                className={`py-1.5 px-3 rounded border text-xs font-mono transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-primary/20 border-primary text-white shadow-[0_0_10px_rgba(34,211,238,0.2)]'
-                    : 'bg-surface-highlight border-border/80 text-muted-foreground hover:text-white hover:border-slate-500'
+                    ? 'bg-[#181b24] border-primary text-white font-bold shadow-sm'
+                    : 'bg-[#12141c] border-border text-muted-foreground hover:text-white hover:border-slate-500'
                 }`}
               >
                 TP = {tpOption}
-                <span className="block text-[9px] font-normal text-muted-foreground">
+                <span className="block text-[10px] text-muted-foreground font-normal">
                   {tpOption === 1 ? '1x GPU' : `${tpOption}x GPUs`}
                 </span>
               </button>
@@ -320,24 +320,24 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
         </div>
 
         {currentTp > 1 && (
-          <div className="text-[11px] text-cyan-300/90 bg-cyan-950/30 p-2 rounded-lg border border-cyan-900/40 font-mono flex justify-between items-center">
-            <span>Per-GPU VRAM requirement: <strong>{sizing.peakMemory.perGpuVRAMRequiredGiB.toFixed(1)} GiB</strong></span>
-            <span>Total cluster required: {sizing.peakMemory.totalVRAMRequiredGiB.toFixed(1)} GiB</span>
+          <div className="text-[11px] text-slate-300 bg-[#14161f] p-2.5 rounded border border-border font-mono flex justify-between items-center">
+            <span>Per-GPU VRAM requirement: <strong className="text-white">{sizing.peakMemory.perGpuVRAMRequiredGiB.toFixed(1)} GiB</strong></span>
+            <span className="text-muted-foreground">Cluster Total: {sizing.peakMemory.totalVRAMRequiredGiB.toFixed(1)} GiB</span>
           </div>
         )}
       </div>
 
       {/* Traffic & Concurrency */}
-      <div className="p-4 rounded-xl bg-surface-highlight/70 border border-border/80 space-y-3">
+      <div className="p-4 rounded-lg bg-[#0e1017] border border-border space-y-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Users size={18} className="text-accent" weight="duotone" />
-            <Label className="text-xs font-bold text-white uppercase tracking-wider">
+            <Users size={16} className="text-primary" />
+            <Label className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider">
               Concurrent Active Streams (Batch Size B)
             </Label>
           </div>
-          <span className="font-mono font-bold text-accent text-sm bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
-            {workload.concurrency} simultaneous requests
+          <span className="font-mono text-xs text-foreground bg-[#181b24] px-2 py-0.5 rounded border border-border">
+            {workload.concurrency} streams
           </span>
         </div>
 
@@ -349,10 +349,10 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
           onValueChange={([val]) => onChange({ ...workload, concurrency: val })}
         />
 
-        <div className="text-[11px] text-muted-foreground flex items-center justify-between">
-          <span>Concurrency = parallel generation streams in flight.</span>
-          <span className="text-slate-400 font-mono">
-            Supports ~{workload.concurrency * 25} to {workload.concurrency * 40} registered users
+        <div className="text-[11px] text-muted-foreground font-mono flex items-center justify-between">
+          <span>Active concurrent generation streams in flight</span>
+          <span className="text-slate-400">
+            ~{workload.concurrency * 25} to {workload.concurrency * 40} total registered users
           </span>
         </div>
       </div>
@@ -360,16 +360,19 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
       {/* Sequence Length Distributions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Prompt Tokens */}
-        <div className="p-4 rounded-xl bg-card border border-border/80 space-y-3">
+        <div className="p-4 rounded-lg bg-[#0e1017] border border-border space-y-3">
           <div className="flex justify-between items-center">
-            <Label className="text-xs font-semibold text-white">Input Prompt Tokens</Label>
-            <span className="font-mono text-xs text-cyan-400">
+            <Label className="text-xs font-mono font-semibold text-foreground">Input Prompt Tokens</Label>
+            <span className="font-mono text-xs text-slate-300">
               P50: {workload.promptTokensP50}t • P99: {workload.promptTokensP99}t
             </span>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] text-muted-foreground block">Typical Prompt (P50)</span>
+            <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+              <span>Typical Prompt (P50)</span>
+              <span>{workload.promptTokensP50} tokens</span>
+            </div>
             <Slider
               min={128}
               max={16384}
@@ -386,7 +389,10 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] text-muted-foreground block">Peak Context Stress (P99)</span>
+            <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+              <span>Peak Prompt Stress (P99)</span>
+              <span>{workload.promptTokensP99} tokens</span>
+            </div>
             <Slider
               min={workload.promptTokensP50}
               max={32768}
@@ -398,16 +404,19 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
         </div>
 
         {/* Generation Tokens */}
-        <div className="p-4 rounded-xl bg-card border border-border/80 space-y-3">
+        <div className="p-4 rounded-lg bg-[#0e1017] border border-border space-y-3">
           <div className="flex justify-between items-center">
-            <Label className="text-xs font-semibold text-white">Output Generation Tokens</Label>
-            <span className="font-mono text-xs text-accent">
+            <Label className="text-xs font-mono font-semibold text-foreground">Output Generation Tokens</Label>
+            <span className="font-mono text-xs text-slate-300">
               P50: {workload.generationTokensP50}t • P99: {workload.generationTokensP99}t
             </span>
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] text-muted-foreground block">Typical Output (P50)</span>
+            <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+              <span>Typical Output (P50)</span>
+              <span>{workload.generationTokensP50} tokens</span>
+            </div>
             <Slider
               min={32}
               max={2048}
@@ -424,7 +433,10 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
           </div>
 
           <div className="space-y-1">
-            <span className="text-[10px] text-muted-foreground block">Peak Output Stress (P99)</span>
+            <div className="flex justify-between text-[11px] text-muted-foreground font-mono">
+              <span>Peak Output Stress (P99)</span>
+              <span>{workload.generationTokensP99} tokens</span>
+            </div>
             <Slider
               min={workload.generationTokensP50}
               max={4096}
@@ -437,19 +449,19 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
       </div>
 
       {/* Target Service Level Objectives (SLAs) */}
-      <div className="p-4 rounded-xl bg-slate-900/60 border border-border/80">
-        <div className="flex items-center gap-2 mb-3">
-          <Timer size={18} className="text-cyan-400" weight="duotone" />
-          <Label className="text-xs font-bold text-white uppercase tracking-wider">
-            Target SLA Acceptance Thresholds
+      <div className="p-4 rounded-lg bg-[#0e1017] border border-border space-y-3">
+        <div className="flex items-center gap-2">
+          <Timer size={16} className="text-primary" />
+          <Label className="text-xs font-mono font-semibold text-foreground uppercase tracking-wider">
+            Target Service Level Objective (SLA)
           </Label>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <div className="flex justify-between text-xs mb-1.5">
+            <div className="flex justify-between text-xs font-mono mb-1.5">
               <span className="text-muted-foreground">Max TTFT (Time To First Token)</span>
-              <span className="font-mono text-white font-bold">&lt; {workload.sla.maxTtftMs} ms</span>
+              <span className="text-foreground font-medium">&lt; {workload.sla.maxTtftMs} ms</span>
             </div>
             <Slider
               min={100}
@@ -463,9 +475,9 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
           </div>
 
           <div>
-            <div className="flex justify-between text-xs mb-1.5">
+            <div className="flex justify-between text-xs font-mono mb-1.5">
               <span className="text-muted-foreground">Max ITL (Inter-Token Latency)</span>
-              <span className="font-mono text-white font-bold">&lt; {workload.sla.maxItlMs} ms/token</span>
+              <span className="text-foreground font-medium">&lt; {workload.sla.maxItlMs} ms/token</span>
             </div>
             <Slider
               min={10}
@@ -477,6 +489,26 @@ export function WorkloadBuilder({ workload, onChange }: WorkloadBuilderProps) {
               }
             />
           </div>
+        </div>
+      </div>
+
+      {/* AI SDK Terminal Runner Block */}
+      <div className="rounded-lg bg-[#08090d] border border-border p-3.5 space-y-2">
+        <div className="flex items-center justify-between text-xs font-mono text-muted-foreground pb-2 border-b border-border/50">
+          <div className="flex items-center gap-2">
+            <TerminalWindow size={15} className="text-primary" />
+            <span className="text-slate-300">Generated Serving Benchmark Command</span>
+          </div>
+          <button
+            onClick={handleCopyCommand}
+            className="flex items-center gap-1 hover:text-white transition-colors cursor-pointer text-[11px]"
+          >
+            {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+            <span>{copied ? 'Copied' : 'Copy'}</span>
+          </button>
+        </div>
+        <div className="font-mono text-xs text-slate-300 overflow-x-auto whitespace-pre-wrap break-all py-1">
+          <span className="text-primary">$</span> {bundle.runnerTarget.cliCommand}
         </div>
       </div>
     </section>
