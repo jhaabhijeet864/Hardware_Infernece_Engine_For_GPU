@@ -21,7 +21,7 @@ function runGit(command) {
         GIT_CONFIG_NOSYSTEM: '1',
       },
     }).trim();
-  } catch (error) {
+  } catch {
     // Retry with standard env if sandboxed/special config fails
     return execSync(command, { cwd: rootDir, encoding: 'utf-8' }).trim();
   }
@@ -71,14 +71,7 @@ try {
 }
 
 // Determine git revision range
-let gitRange = 'HEAD';
-let isInitialRelease = false;
-if (latestTag) {
-  gitRange = `${latestTag}..HEAD`;
-} else {
-  isInitialRelease = true;
-  gitRange = 'HEAD';
-}
+const isInitialRelease = !latestTag;
 
 // Fetch commits
 let rawCommits = '';
@@ -133,7 +126,6 @@ const categories = {
 
 let hasBreaking = false;
 let hasFeat = false;
-let hasFix = false;
 
 const contributors = new Set();
 
@@ -154,7 +146,6 @@ for (const commit of parsedCommits) {
       categories.feat.items.push(commit);
       break;
     case 'fix':
-      hasFix = true;
       categories.fix.items.push(commit);
       break;
     case 'perf':

@@ -79,7 +79,6 @@ export function generateSyntheticBenchmark(
   metrics: ParsedBenchmarkResults;
   telemetry: TelemetrySummary;
 } {
-  const isHighConcurrency = workload.concurrency > 8;
   const promptLen = workload.promptTokensP50;
 
   // Realistic latency estimation based on prompt length and concurrency on modern GPU

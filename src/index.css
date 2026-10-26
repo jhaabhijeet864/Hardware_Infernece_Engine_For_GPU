@@ -138,3 +138,28 @@
     filter: drop-shadow(0 0 25px oklch(0.73 0.14 195 / 0.6));
   }
 }
+
+/* Print Stylesheet for Hardware Acceptance Certificates */
+@media print {
+  nav,
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  #qualification-certificate {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+

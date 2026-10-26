@@ -50,7 +50,7 @@ function calculatePercentile(values: number[], p: number): number {
  * Robustly parses benchmark results from vLLM bench serve JSON or GenAI-Perf JSON output.
  */
 export function parseBenchmarkMetrics(
-  rawJson: Record<string, any>,
+  rawJson: Record<string, unknown>,
   options?: ParseOptions
 ): ParsedBenchmarkResults {
   const maxTtft = options?.maxTtftMs ?? 600;
@@ -58,7 +58,7 @@ export function parseBenchmarkMetrics(
 
   // Case 1: Detailed per-request traces available
   if (Array.isArray(rawJson.results) || Array.isArray(rawJson.detailed_results)) {
-    const list: any[] = rawJson.results || rawJson.detailed_results;
+    const list = (rawJson.results || rawJson.detailed_results) as Array<Record<string, unknown>>;
     const ttfts: number[] = [];
     const itls: number[] = [];
     const e2es: number[] = [];
