@@ -23,12 +23,14 @@ export default defineConfig({
     }
   },
   build: {
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
           'vendor-motion': ['framer-motion'],
           'vendor-icons': ['@phosphor-icons/react', 'lucide-react'],
+          'vendor-query': ['@tanstack/react-query'],
         },
       },
     },
