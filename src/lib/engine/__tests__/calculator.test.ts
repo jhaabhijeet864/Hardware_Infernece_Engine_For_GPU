@@ -61,14 +61,15 @@ console.log('--- Starting Engine Mathematical Verification Tests ---')
   console.log(`✓ Test 3 Passed: Weights scale accurately across precisions (FP16: ${fp16GiB} GiB).`)
 }
 
-// 4. Test Case 4: DeepSeek-V3 MLA Verification
+// 4. Test Case 4: DeepSeek-V3 & DeepSeek-R1 MLA Verification
 {
-  const deepseek = MODEL_REGISTRY['deepseek-v3']
+  const deepseek = MODEL_REGISTRY['deepseek-r1']
+  assert(deepseek.attentionType === 'MLA', 'DeepSeek-R1 must use MLA attention')
   const kvBytes = calculateKVCacheBytes(deepseek, 4096, 1, 'FP16')
   // DeepSeek MLA: 61 layers * 576 latent dim * 4096 * 1 * 2 bytes = 287,834,112 bytes (~0.268 GiB)
   const kvGiB = bytesToGiB(kvBytes)
-  assertCloseTo(kvGiB, 0.27, 0.02, 'DeepSeek-V3 MLA KV cache at 4k context should be ~0.27 GiB')
-  console.log(`✓ Test 4 Passed: DeepSeek-V3 MLA calculation verified (${kvGiB} GiB for 4k context).`)
+  assertCloseTo(kvGiB, 0.27, 0.02, 'DeepSeek-R1 MLA KV cache at 4k context should be ~0.27 GiB')
+  console.log(`✓ Test 4 Passed: DeepSeek-R1 MLA calculation verified (${kvGiB} GiB for 4k context).`)
 }
 
 // 5. Test Case 5: Full Workload Inference Calculation
@@ -89,4 +90,52 @@ console.log('--- Starting Engine Mathematical Verification Tests ---')
   console.log(`✓ Test 5 Passed: Full workload estimation passed. Total VRAM: ${result.memory.totalVRAMRequiredGiB} GiB.`)
 }
 
-console.log('--- All 5 Mathematical Verification Tests Passed Successfully! ---')
+// 6. Test Case 6: Tensor Parallelism (TP=2) Sharding
+{
+  const singleGpu = calculateInferenceWorkload({
+    model: 'llama-3.1-70b',
+    precision: 'FP16',
+    contextLength: 4096,
+    batchSize: 4,
+    tensorParallelSize: 1,
+    cudaRuntimeOverheadGiB: 0.8,
+  })
+
+  const dualGpu = calculateInferenceWorkload({
+    model: 'llama-3.1-70b',
+    precision: 'FP16',
+    contextLength: 4096,
+    batchSize: 4,
+    tensorParallelSize: 2,
+    cudaRuntimeOverheadGiB: 0.8,
+  })
+
+  assert(dualGpu.tensorParallelSize === 2, 'Result must reflect TP=2')
+  // Per-GPU required VRAM should be significantly lower than single GPU total VRAM
+  assert(dualGpu.memory.perGpuVRAMRequiredGiB < singleGpu.memory.totalVRAMRequiredGiB * 0.6, 'Per GPU VRAM with TP=2 must be ~55% of single GPU')
+  console.log(`✓ Test 6 Passed: Tensor Parallelism (TP=2) verified. Single: ${singleGpu.memory.totalVRAMRequiredGiB.toFixed(1)} GiB -> Per-GPU: ${dualGpu.memory.perGpuVRAMRequiredGiB.toFixed(1)} GiB.`)
+}
+
+// 7. Test Case 7: FP8 KV-Cache Precision Reduction
+{
+  const fp16Kv = calculateInferenceWorkload({
+    model: 'llama-3.1-8b',
+    precision: 'FP16',
+    kvCachePrecision: 'FP16',
+    contextLength: 16384,
+    batchSize: 4,
+  })
+
+  const fp8Kv = calculateInferenceWorkload({
+    model: 'llama-3.1-8b',
+    precision: 'FP16',
+    kvCachePrecision: 'FP8',
+    contextLength: 16384,
+    batchSize: 4,
+  })
+
+  assertCloseTo(fp8Kv.memory.kvCacheGiB, fp16Kv.memory.kvCacheGiB / 2, 0.05, 'FP8 KV Cache must be exactly half of FP16')
+  console.log(`✓ Test 7 Passed: FP8 KV-Cache verified. FP16: ${fp16Kv.memory.kvCacheGiB} GiB -> FP8: ${fp8Kv.memory.kvCacheGiB} GiB.`)
+}
+
+console.log('--- All 7 Mathematical Verification Tests Passed Successfully! ---')

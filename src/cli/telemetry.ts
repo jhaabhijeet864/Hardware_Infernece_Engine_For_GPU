@@ -72,20 +72,33 @@ export class GpuTelemetrySampler {
       ).trim();
 
       if (!raw) return null;
-      const line = raw.split("\n")[0];
-      const parts = line.split(",").map((p) => p.trim());
+      const lines = raw.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (lines.length === 0) return null;
 
-      const memMib = parseFloat(parts[0]) || 0;
-      const util = parseFloat(parts[1]) || 0;
-      const temp = parseFloat(parts[2]) || 0;
-      const power = parseFloat(parts[3]) || 0;
+      let totalMemMib = 0;
+      let maxUtil = 0;
+      let maxTemp = 0;
+      let totalPower = 0;
+
+      for (const line of lines) {
+        const parts = line.split(",").map((p) => p.trim());
+        const memMib = parseFloat(parts[0]) || 0;
+        const util = parseFloat(parts[1]) || 0;
+        const temp = parseFloat(parts[2]) || 0;
+        const power = parseFloat(parts[3]) || 0;
+
+        totalMemMib += memMib;
+        if (util > maxUtil) maxUtil = util;
+        if (temp > maxTemp) maxTemp = temp;
+        totalPower += power;
+      }
 
       return {
         timestamp: now,
-        memory_used_gib: Number((memMib / 1024).toFixed(2)),
-        gpu_utilization_pct: util,
-        temperature_c: temp,
-        power_draw_w: power,
+        memory_used_gib: Number((totalMemMib / 1024).toFixed(2)),
+        gpu_utilization_pct: maxUtil,
+        temperature_c: maxTemp,
+        power_draw_w: totalPower,
       };
     } catch {
       // If physical sampling fails, mark as simulated and return simulated reading
