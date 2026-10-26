@@ -1,8 +1,8 @@
-import { computeBenchmarkDeltas } from "../delta-analysis";
+import { computeBenchmarkDeltas } from "../src/delta-analysis";
 import {
   SAMPLE_RUN_RAG_4090_PASS,
   SAMPLE_RUN_CHATBOT_2050_FAIL,
-} from "../../fixtures/sample-runs";
+} from "../../../src/lib/fixtures/sample-runs";
 
 async function runDeltaTests() {
   console.log("--- Starting Delta Analysis Verification Tests ---");

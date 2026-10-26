@@ -1,9 +1,9 @@
-import { validateQualificationBundle } from "../bundle-validator";
+import { validateQualificationBundle } from "../src/bundle-validator";
 import {
   SAMPLE_RUN_RAG_4090_PASS,
   SAMPLE_RUN_CHATBOT_2050_FAIL,
   SAMPLE_RUN_CODE_L40S_PASS,
-} from "../../fixtures/sample-runs";
+} from "../../../src/lib/fixtures/sample-runs";
 
 async function runValidatorTests() {
   console.log("--- Starting Bundle Validator Verification Tests ---");
