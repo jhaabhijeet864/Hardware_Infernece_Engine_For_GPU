@@ -75,6 +75,74 @@ export const EmergencyHaltCommandSchema = z.object({
 
 export type EmergencyHaltCommand = z.infer<typeof EmergencyHaltCommandSchema>;
 
+// Fleet & Rig Presence
+export type RigStatus = 'IDLE' | 'BENCHMARKING' | 'THROTTLED' | 'OFFLINE';
+
+export const RigRegistrationRequestSchema = z.object({
+  hardwareUuid: z.string().min(1),
+  systemHash: z.string().min(1),
+  name: z.string().min(1),
+  gpuModel: z.string().min(1),
+  gpuCount: z.number().int().positive().default(1),
+  vramTotalBytes: z.number().positive(),
+  driverVersion: z.string().default('Unknown'),
+  cudaVersion: z.string().default('Unknown'),
+  pcieLink: z.string().default('Gen 4 x16'),
+  hostCpu: z.string().default('Unknown CPU'),
+  hostRamBytes: z.number().positive().default(34359738368),
+  partnerOrg: z.string().default('Shenzhen Precision AI Hardware Co.'),
+});
+export type RigRegistrationRequest = z.infer<typeof RigRegistrationRequestSchema>;
+
+export const RigSummarySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  hardwareUuid: z.string(),
+  systemHash: z.string(),
+  gpuModel: z.string(),
+  gpuCount: z.number().int(),
+  vramTotalBytes: z.number(),
+  vramTotalGiB: z.number(),
+  status: z.enum(['IDLE', 'BENCHMARKING', 'THROTTLED', 'OFFLINE']),
+  isOnline: z.boolean(),
+  lastHeartbeatAt: z.number(),
+  currentJobId: z.string().nullable().optional(),
+  partnerOrg: z.string(),
+});
+export type RigSummary = z.infer<typeof RigSummarySchema>;
+
+// Qualification Job Dispatch & Progress
+export const QualificationJobDispatchSchema = z.object({
+  jobId: z.string().uuid(),
+  batchId: z.string().uuid().optional(),
+  targetRigId: z.string().uuid(),
+  workloadArchetype: z.string().default('enterprise-rag'),
+  modelId: z.string().default('meta-llama/Llama-3.1-8B-Instruct'),
+  precision: z.string().default('FP16'),
+  promptTokens: z.number().int().positive().default(4096),
+  genTokens: z.number().int().positive().default(512),
+  concurrency: z.number().int().positive().default(8),
+  sla: z.object({
+    maxTtftMs: z.number().positive().default(500),
+    maxItlMs: z.number().positive().default(35),
+  }),
+  timeoutSeconds: z.number().int().positive().default(600),
+});
+export type QualificationJobDispatch = z.infer<typeof QualificationJobDispatchSchema>;
+
+export const JobProgressEventSchema = z.object({
+  jobId: z.string().uuid(),
+  rigId: z.string().uuid(),
+  status: z.enum(['INITIALIZING', 'WARMUP', 'BENCHMARKING', 'COMPLETED', 'FAILED', 'ABORTED']),
+  progressPct: z.number().min(0).max(100),
+  currentTtftMs: z.number().optional(),
+  currentItlMs: z.number().optional(),
+  currentVramGiB: z.number().optional(),
+  logMessage: z.string().optional(),
+  timestamp: z.number().int().positive(),
+});
+export type JobProgressEvent = z.infer<typeof JobProgressEventSchema>;
+
 // Cryptographic Verification Helpers
 export function isCommandTimestampValid(timestamp: number, maxSkewMs: number = 5000): boolean {
   return Math.abs(Date.now() - timestamp) <= maxSkewMs;

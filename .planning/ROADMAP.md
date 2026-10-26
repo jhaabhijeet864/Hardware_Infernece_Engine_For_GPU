@@ -9,14 +9,14 @@
 
 ### Phase 6: Central Fleet Gateway & Rig Telemetry Relay
 **Focus**: Server-side WebSocket streaming relay, machine pairing, and PostgreSQL persistence.
-- [ ] **6.1 WebSocket Gateway & Connection Manager**:
+- [x] **6.1 WebSocket Gateway & Connection Manager**:
   - Implement Fastify WebSocket gateway with live subscription routing in `apps/server/src/index.ts`.
   - Handle rig registration, heartbeat ping/pong, and multi-client broadcast.
-- [ ] **6.2 Database Schema & Drizzle ORM Setup**:
+- [x] **6.2 Database Schema & Drizzle ORM Setup**:
   - Define PostgreSQL schema for physical machines, active qualification jobs, telemetry time-series, and acceptance certificates.
-- [ ] **6.3 REST & Command Dispatch Endpoints**:
+- [x] **6.3 REST & Command Dispatch Endpoints**:
   - Implement endpoints for remote benchmark job dispatching, pairing verification (6-digit PIN), cloud arbitrage pricing, and emergency abort.
-- [ ] **6.4 Verification**:
+- [x] **6.4 Verification**:
   - Integration tests for WebSocket message propagation, pairing handshakes, and database persistence.
 
 ### Phase 7: Desktop Daemon & Automated Factory Test Agent
