@@ -1,0 +1,33 @@
+{
+  "name": "@hardware-inference/cli",
+  "version": "0.1.0",
+  "description": "Headless hardware qualification and benchmark runner CLI for Local AI infrastructure",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "hw-qual": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "npx tsx __tests__/env-capture.test.ts && npx tsx __tests__/adapter.test.ts && npx tsx __tests__/bundle.test.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@hardware-inference/core": "^0.1.0",
+    "@hardware-inference/protocol": "^0.1.0",
+    "@hardware-inference/types": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "~5.7.2"
+  }
+}
