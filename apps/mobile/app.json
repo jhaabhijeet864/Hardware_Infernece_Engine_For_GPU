@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Hardware-Inference Rig Monitor",
+    "slug": "hardware-inference-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0b10"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hardwareinference.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0b10"
+      },
+      "package": "com.hardwareinference.mobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
