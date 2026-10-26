@@ -1,6 +1,6 @@
 export type PrecisionType = 'fp32' | 'fp16' | 'int8' | 'int4' | 'gptq'
 
-export type TabMode = 'inference' | 'acceptance' | 'training' | 'quantization'
+export type TabMode = 'inference' | 'acceptance' | 'decision-matrix' | 'training' | 'quantization'
 
 export interface ModelPreset {
   id: string

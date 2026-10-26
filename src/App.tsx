@@ -8,8 +8,9 @@ import { QuantizationComparison } from '@/components/QuantizationComparison'
 import { BundleUploader } from '@/components/BundleUploader'
 import { AcceptanceComparisonView } from '@/components/AcceptanceComparisonView'
 import { AcceptanceCertificate } from '@/components/AcceptanceCertificate'
+import { PartnerDecisionMatrix } from '@/components/PartnerDecisionMatrix'
 import { Header } from '@/components/Header'
-import { Lightning, ChartBar, ShieldCheck, SealCheck } from '@phosphor-icons/react'
+import { Lightning, ChartBar, ShieldCheck, SealCheck, Desktop } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { Toaster } from '@/components/ui/sonner'
 import { calculateMemoryRequirements } from '@/lib/calculator'
@@ -65,7 +66,7 @@ function App() {
         <nav
           role="tablist"
           aria-label="Calculator modes"
-          className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-card p-1 rounded-xl border border-border w-full max-w-4xl mx-auto mb-2"
+          className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 bg-card p-1 rounded-xl border border-border w-full max-w-5xl mx-auto mb-2"
         >
           <button
             role="tab"
@@ -123,6 +124,30 @@ function App() {
             </span>
             {activeTab === 'acceptance' && (
               <div className="absolute bottom-0 h-[2px] w-1/3 bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+            )}
+          </button>
+
+          <button
+            role="tab"
+            aria-selected={activeTab === 'decision-matrix'}
+            aria-controls="tabpanel-decision-matrix"
+            id="tab-decision-matrix"
+            onClick={() => setActiveTab('decision-matrix')}
+            className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-lg relative overflow-hidden group transition-all min-h-[44px] ${
+              activeTab === 'decision-matrix'
+                ? 'bg-primary/20 border border-primary/50 text-white'
+                : 'text-muted-foreground hover:text-white hover:bg-surface-highlight'
+            }`}
+          >
+            {activeTab === 'decision-matrix' && (
+              <div className="absolute inset-0 bg-primary/10 blur-sm group-hover:bg-primary/20 transition-all" />
+            )}
+            <span className="relative z-10 font-bold tracking-wide flex items-center gap-1.5 text-xs sm:text-sm">
+              <Desktop size={18} weight="duotone" className="text-cyan-300 shrink-0" aria-hidden="true" />
+              <span>3. OEM Matrix</span>
+            </span>
+            {activeTab === 'decision-matrix' && (
+              <div className="absolute bottom-0 h-[2px] w-1/3 bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
             )}
           </button>
           
@@ -203,6 +228,11 @@ function App() {
               />
             </div>
 
+            {/* OEM & Partner Hardware Decision Matrix */}
+            <div className="lg:col-span-12">
+              <PartnerDecisionMatrix workload={workload} />
+            </div>
+
             {/* Quick action bridge to acceptance reports */}
             <div className="lg:col-span-12 p-4 rounded-xl bg-surface-dark/90 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-[0_0_15px_rgba(34,211,238,0.08)]">
               <div className="flex items-center gap-3">
@@ -248,6 +278,21 @@ function App() {
                 <AcceptanceCertificate bundle={qualificationBundle} />
               </>
             )}
+          </motion.div>
+        )}
+
+        {/* OEM Decision Matrix Tab (Phase 5) */}
+        {activeTab === 'decision-matrix' && (
+          <motion.div
+            id="tabpanel-decision-matrix"
+            role="tabpanel"
+            aria-labelledby="tab-decision-matrix"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col gap-6"
+          >
+            <PartnerDecisionMatrix workload={workload} />
           </motion.div>
         )}
 
