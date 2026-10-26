@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { TriangleAlert, Timer, ShieldCheck } from 'lucide-react'
+import { TriangleAlert, Timer, Cpu } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import type { MemoryBreakdown } from '@/lib/types'
 import { EnhancedMemoryBreakdown } from '@/lib/calculator'
 import { WorkloadMemorySizing } from '@/lib/engine'
-
-const VRAM_WARNING_THRESHOLD_GIB = 1000
 
 interface ResultsDisplayProps {
   memoryBreakdown: MemoryBreakdown | EnhancedMemoryBreakdown
@@ -37,8 +35,11 @@ function AnimatedNumber({ value }: { value: number }) {
 export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDisplayProps) {
   const totalGiB = workloadSizing ? workloadSizing.typicalMemory.totalVRAMRequiredGiB : memoryBreakdown.total
   const peakGiB = workloadSizing ? workloadSizing.peakMemory.totalVRAMRequiredGiB : undefined
+  const tp = workloadSizing?.typicalMemory.tensorParallelSize ?? 1
+  const perGpuPeak = workloadSizing?.peakMemory.perGpuVRAMRequiredGiB
 
-  const showVramWarning = totalGiB > VRAM_WARNING_THRESHOLD_GIB
+  // Warn if single GPU execution exceeds 80 GiB
+  const showSingleGpuWarning = tp === 1 && totalGiB > 80
   const enhanced = memoryBreakdown as EnhancedMemoryBreakdown
   const status = enhanced.status || 'Analytical Estimate'
   const decimalGB = (totalGiB * 1.07374).toFixed(2)
@@ -55,8 +56,13 @@ export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDispl
       <div className="bg-card relative rounded-[15px] p-6 h-full flex flex-col">
         {/* Header Badge */}
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
-            Qualification Pre-Check
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <span>Qualification Pre-Check</span>
+            {tp > 1 && (
+              <span className="text-[10px] px-2 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">
+                TP={tp} Cluster
+              </span>
+            )}
           </h3>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-800/60">
             <span className="size-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -64,12 +70,12 @@ export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDispl
           </span>
         </div>
 
-        {showVramWarning && (
+        {showSingleGpuWarning && (
           <Alert className="mb-4 border-amber-500 bg-amber-500/10 text-amber-300">
             <TriangleAlert className="size-4" />
-            <AlertTitle>Exceeds Single-Node Memory Limits</AlertTitle>
-            <AlertDescription className="text-amber-200/80">
-              Requirement of {totalGiB} GiB exceeds standard server memory limits. Multi-GPU tensor parallelism (vLLM pipeline/tensor parallel) or quantization required.
+            <AlertTitle>Exceeds Single GPU Capacity</AlertTitle>
+            <AlertDescription className="text-amber-200/80 text-xs">
+              Workload requires {totalGiB.toFixed(1)} GiB, exceeding the largest single datacenter GPU (80–141 GiB). Switch to Multi-GPU (TP ≥ 2 or TP=4) in the Workload Builder.
             </AlertDescription>
           </Alert>
         )}
@@ -97,9 +103,16 @@ export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDispl
             Typical Operating Memory (P50) ≈ <span className="font-mono text-slate-300">{decimalGB} GB</span>
           </p>
 
+          {tp > 1 && perGpuPeak && (
+            <div className="mt-2 text-[11px] font-mono text-cyan-300 bg-cyan-950/50 px-2.5 py-0.5 rounded-full border border-cyan-800/50 flex items-center gap-1.5">
+              <Cpu size={12} />
+              <span>Per-GPU Allocation: <strong>{perGpuPeak.toFixed(1)} GiB / GPU</strong> (Across {tp} GPUs)</span>
+            </div>
+          )}
+
           {peakGiB && (
             <div className="mt-2 text-[11px] font-mono text-amber-400/90 bg-amber-950/30 px-2.5 py-0.5 rounded-full border border-amber-800/40">
-              Peak Stress Bound (P99): <span className="font-bold text-amber-300">{peakGiB} GiB</span>
+              Peak Stress Bound (P99): <span className="font-bold text-amber-300">{peakGiB} GiB Total</span>
             </div>
           )}
           
@@ -127,7 +140,7 @@ export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDispl
           <div className="flex justify-between items-center p-2 rounded-lg bg-surface-highlight border border-border">
             <div className="flex items-center gap-2">
               <div className="size-2 rounded-full bg-pink-500" aria-hidden="true" />
-              <span className="text-xs text-card-foreground">CUDA Context & Buffer</span>
+              <span className="text-xs text-card-foreground">CUDA Context &amp; Buffer</span>
             </div>
             <span className="font-mono text-white font-bold text-xs">{overhead} GiB</span>
           </div>
@@ -139,14 +152,13 @@ export function ResultsDisplay({ memoryBreakdown, workloadSizing }: ResultsDispl
                   <Timer size={13} className="text-cyan-400" />
                   Target SLA Criteria
                 </span>
-                <span className="font-mono text-[10px] text-cyan-300">
+                <span className="text-[10px] text-emerald-400 font-mono">
                   TTFT &lt; {workloadSizing.workload.sla.maxTtftMs}ms • ITL &lt; {workloadSizing.workload.sla.maxItlMs}ms
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400 flex items-start gap-1">
-                <ShieldCheck size={13} className="text-emerald-400 shrink-0 mt-0.5" />
-                <span>{workloadSizing.qualificationRecommendation}</span>
-              </div>
+              <p className="text-[10px] text-slate-400 leading-normal">
+                {workloadSizing.qualificationRecommendation}
+              </p>
             </div>
           )}
         </div>

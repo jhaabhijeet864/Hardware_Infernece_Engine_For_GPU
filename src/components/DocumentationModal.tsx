@@ -5,7 +5,6 @@ import {
   Cpu,
   Calculator,
   ShieldCheck,
-  Lightning,
   Sparkle,
 } from "@phosphor-icons/react";
 
