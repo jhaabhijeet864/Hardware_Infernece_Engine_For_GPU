@@ -37,3 +37,5 @@ AGENT.md
 GEMINI.md
 
 .spark-workbench-id
+qualification_artifacts/
+.gemini/

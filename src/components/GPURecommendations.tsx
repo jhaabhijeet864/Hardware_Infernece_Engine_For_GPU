@@ -1,6 +1,5 @@
-import { useMemo } from 'react'
-import { Desktop, Warning, FunnelSimple, CheckCircle, Cpu } from '@phosphor-icons/react'
-import { motion } from 'framer-motion'
+import { useState, useMemo } from 'react'
+import { Desktop, Cpu } from '@phosphor-icons/react'
 import { GPU_DATABASE } from '@/lib/constants'
 import { calculateMemoryOccupancy } from '@/lib/calculator'
 
@@ -16,11 +15,14 @@ export function GPURecommendations({
   tensorParallelSize = 1,
 }: GPURecommendationsProps) {
   const isMultiGpu = tensorParallelSize > 1
+  const [filter, setFilter] = useState<'all' | 'workstation' | 'datacenter'>('all')
+
+  const effectiveVram = isMultiGpu && perGpuVRAM ? perGpuVRAM : requiredVRAM
 
   const gpuRecommendations = useMemo(() => {
     return GPU_DATABASE.map((gpu) => {
-      // If multi-GPU, compare against total cluster VRAM
-      const occupancy = calculateMemoryOccupancy(requiredVRAM, gpu.vram)
+      const occupancy = calculateMemoryOccupancy(effectiveVram, gpu.vram)
+      const headroomGiB = gpu.vram - effectiveVram
       const isOptimal = occupancy >= 45 && occupancy <= 85
       const isTight = occupancy > 85 && occupancy <= 100
       const isInsufficient = occupancy > 100
@@ -28,11 +30,18 @@ export function GPURecommendations({
       return {
         ...gpu,
         occupancy,
+        headroomGiB,
         isOptimal,
         isTight,
         isInsufficient,
       }
-    }).sort((a, b) => {
+    })
+    .filter((gpu) => {
+      if (filter === 'all') return true
+      if (filter === 'datacenter') return gpu.iconType === 'datacenter'
+      return gpu.iconType !== 'datacenter'
+    })
+    .sort((a, b) => {
       if (a.isOptimal && !b.isOptimal) return -1
       if (!a.isOptimal && b.isOptimal) return 1
       if (a.isTight && !b.isTight && !b.isOptimal) return -1
@@ -40,126 +49,114 @@ export function GPURecommendations({
       if (!a.isInsufficient && b.isInsufficient) return -1
       return Math.abs(75 - a.occupancy) - Math.abs(75 - b.occupancy)
     })
-  }, [requiredVRAM])
+  }, [effectiveVram, filter])
 
   return (
-    <section className="glass-panel p-6 rounded-2xl flex-1 flex flex-col">
-      <div className="flex justify-between items-center mb-4">
+    <section className="bg-[#11131a] p-5 sm:p-6 rounded-xl border border-border flex flex-col space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 pb-3 border-b border-border">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>Hardware Matchmaker</span>
+          <h3 className="text-xs font-mono font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <span>Hardware Compatibility Matrix</span>
             {isMultiGpu && (
-              <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">
-                TP={tensorParallelSize} Cluster
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#181b24] text-primary border border-border font-mono">
+                TP={tensorParallelSize}
               </span>
             )}
           </h3>
-          <p className="text-xs text-muted-foreground">
-            {isMultiGpu && perGpuVRAM
-              ? `Ranked for ${requiredVRAM.toFixed(1)} GiB total (${perGpuVRAM.toFixed(1)} GiB per GPU)`
-              : 'Ranked by estimated memory headroom'}
+          <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
+            Ranked for {effectiveVram.toFixed(1)} GiB allocation per GPU
           </p>
         </div>
-        <button className="text-muted-foreground hover:text-white transition-colors" title="Filter GPUs">
-          <FunnelSimple size={20} />
-        </button>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[300px] lg:max-h-none">
-        {gpuRecommendations.slice(0, 6).map((gpu, index) => (
-          <motion.div
-            key={gpu.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.05, duration: 0.3 }}
-            className={`p-3 rounded-xl border relative overflow-hidden group cursor-pointer transition-colors ${
-              gpu.isOptimal
-                ? 'bg-card border-emerald-500/50 hover:bg-surface-highlight'
-                : gpu.isTight
-                ? 'bg-card border-amber-500/40 hover:bg-surface-highlight'
-                : gpu.isInsufficient
-                ? 'bg-card border-red-500/30 hover:bg-surface-highlight'
-                : 'bg-card border-border hover:bg-surface-highlight'
+
+        {/* Filter buttons */}
+        <div className="flex items-center gap-1 bg-[#181b24] p-0.5 rounded border border-border text-[11px] font-mono">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+              filter === 'all' ? 'bg-[#232733] text-white font-medium' : 'text-muted-foreground hover:text-white'
             }`}
           >
-            {gpu.isOptimal && (
-              <div className="absolute right-0 top-0 bg-emerald-500/90 text-background text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10 flex items-center gap-1">
-                <CheckCircle size={10} weight="bold" />
-                FITS MEMORY
-              </div>
-            )}
-            {gpu.isTight && (
-              <div className="absolute right-0 top-0 bg-amber-500/90 text-background text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10">
-                TIGHT MARGIN
-              </div>
-            )}
-            {gpu.isInsufficient && (
-              <div className="absolute right-0 top-0 bg-red-500/80 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg z-10">
-                INSUFFICIENT VRAM
-              </div>
-            )}
-            
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-3">
-                <div className={`p-1.5 rounded ${
-                  gpu.isOptimal
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : gpu.isTight
-                    ? 'bg-amber-500/20 text-amber-400'
-                    : gpu.isInsufficient
-                    ? 'bg-red-500/20 text-red-400'
-                    : gpu.iconType === 'datacenter'
-                    ? 'bg-accent/20 text-accent'
-                    : 'bg-primary/20 text-primary'
-                }`}>
-                  {gpu.isInsufficient ? (
-                    <Warning size={18} weight="duotone" />
-                  ) : gpu.iconType === 'datacenter' ? (
-                    <Desktop size={18} weight="duotone" />
-                  ) : (
-                    <Cpu size={18} weight="duotone" />
-                  )}
+            All
+          </button>
+          <button
+            onClick={() => setFilter('workstation')}
+            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+              filter === 'workstation' ? 'bg-[#232733] text-white font-medium' : 'text-muted-foreground hover:text-white'
+            }`}
+          >
+            Rig / Desk
+          </button>
+          <button
+            onClick={() => setFilter('datacenter')}
+            className={`px-2 py-0.5 rounded transition-colors cursor-pointer ${
+              filter === 'datacenter' ? 'bg-[#232733] text-white font-medium' : 'text-muted-foreground hover:text-white'
+            }`}
+          >
+            Datacenter
+          </button>
+        </div>
+      </div>
+      
+      <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+        {gpuRecommendations.slice(0, 7).map((gpu) => (
+          <div
+            key={gpu.id}
+            className="p-3 rounded-lg bg-[#0e1017] border border-border hover:border-slate-600 transition-colors"
+          >
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1 rounded bg-[#181b24] border border-border text-slate-300">
+                  {gpu.iconType === 'datacenter' ? <Desktop size={14} /> : <Cpu size={14} />}
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-white group-hover:text-primary transition-colors">
-                    {gpu.name}
-                  </h4>
-                  <p className="text-xs text-muted-foreground font-mono">
-                    {gpu.vram} GB {gpu.type}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground">{gpu.name}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      {gpu.vram} GB {gpu.type}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <span className={`text-xs font-mono font-bold ${
+
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${
                   gpu.isOptimal
-                    ? 'text-emerald-400'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                     : gpu.isTight
-                    ? 'text-amber-400'
-                    : gpu.isInsufficient
-                    ? 'text-red-400'
-                    : 'text-white'
+                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    : 'bg-red-500/10 text-red-400 border-red-500/30'
                 }`}>
+                  {gpu.isOptimal ? 'OPTIMAL' : gpu.isTight ? 'TIGHT' : 'INSUFFICIENT'}
+                </span>
+                <span className="text-xs font-mono font-bold text-foreground w-12 text-right">
                   {gpu.occupancy > 999 ? '>999%' : `${gpu.occupancy.toFixed(0)}%`}
                 </span>
-                <p className="text-[10px] text-muted-foreground">Occupancy</p>
               </div>
             </div>
-            
-            <div className="w-full bg-secondary/50 rounded-full h-1.5 overflow-hidden">
+
+            {/* Occupancy bar */}
+            <div className="w-full bg-[#181b24] rounded-full h-1.5 overflow-hidden">
               <div 
-                className={`h-full transition-all duration-500 ${
+                className={`h-full transition-all duration-300 ${
                   gpu.isOptimal
-                    ? 'bg-emerald-500'
+                    ? 'bg-emerald-400'
                     : gpu.isTight
-                    ? 'bg-amber-500'
-                    : gpu.isInsufficient
-                    ? 'bg-red-500'
-                    : 'bg-primary'
+                    ? 'bg-amber-400'
+                    : 'bg-red-500'
                 }`}
                 style={{ width: `${Math.min(100, gpu.occupancy)}%` }}
               />
             </div>
-          </motion.div>
+
+            <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground mt-1.5">
+              <span>
+                {gpu.headroomGiB >= 0
+                  ? `Headroom: +${gpu.headroomGiB.toFixed(1)} GiB buffer`
+                  : `Deficit: ${gpu.headroomGiB.toFixed(1)} GiB shortage`}
+              </span>
+              <span>{gpu.iconType === 'datacenter' ? 'SXM / PCIe Enterprise' : 'PCIe Workstation'}</span>
+            </div>
+          </div>
         ))}
       </div>
     </section>

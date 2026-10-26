@@ -51,13 +51,18 @@ Existing calculators only ask "Does an 8B model fit in 24 GB VRAM?", which ignor
 - [x] **Acceptance Report Generator**: Standardized report generator providing hardware qualification pass/fail status and audit trail.
 - [x] **OEM Partner Matrix & Co-Branding**: Hardware partner machine profiles, customizable delivery certificates, and factory test station runbook.
 
-### Out of Scope (For Initial Qualification Milestone)
-- Full-scale distributed multi-node cluster benchmarking (focus on single-node workstation/server first).
-- Complex custom training memory estimators (label training as experimental or secondary).
-- Proprietary closed-source accelerator support prior to vendor SDK/hardware access.
+### Active: Milestone 2 (Real-Time Rig Telemetry & Cloud Fleet Qualification Platform)
+- [ ] **Fleet Gateway & Relay**: Fastify WebSocket gateway with live rig registration, heartbeat, and real-time telemetry streaming in `apps/server`.
+- [ ] **Desktop Daemon & Sensor Core**: Tauri 2.0 system tray agent with background NVML sensor polling, local caching, and remote benchmark job execution worker.
+- [ ] **Live Operations Cockpit**: Web & desktop operations dashboard displaying multi-machine rig status grid, live telemetry dials, and batch qualification test dispatching.
+- [ ] **Mobile Companion Monitor**: Expo React Native mobile app with real-time hardware telemetry, thermal alerts, and remote emergency benchmark abort switch.
+
+### Out of Scope (For Milestone 2)
+- Multi-node Slurm / Ray distributed training cluster benchmarking (focused on inference and qualification fleets).
+- Proprietary closed-source ASIC hardware without public SDK access.
 
 ## Evolution
 This document evolves at phase transitions and milestone boundaries.
 
 ---
-*Last updated: 2026-10-25 after initialization*
+*Last updated: 2026-10-26 after Milestone 1 completion and Milestone 2 initialization*
