@@ -6,3 +6,4 @@ export * from './workload';
 export * from './exporter';
 export * from './bundle-validator';
 export * from './delta-analysis';
+export * from './partner-matrix';

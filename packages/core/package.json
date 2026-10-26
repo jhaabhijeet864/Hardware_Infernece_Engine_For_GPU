@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "test": "npx tsx __tests__/calculator.test.ts && npx tsx __tests__/workload.test.ts",
+    "test": "npx tsx __tests__/calculator.test.ts && npx tsx __tests__/workload.test.ts && npx tsx __tests__/bundle-validator.test.ts && npx tsx __tests__/delta-analysis.test.ts && npx tsx __tests__/partner-matrix.test.ts",
     "clean": "rimraf dist"
   },
   "dependencies": {
