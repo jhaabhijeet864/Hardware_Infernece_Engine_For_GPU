@@ -95,7 +95,7 @@ export class HardwareInferenceApiClient {
   /**
    * Create an auto-reconnecting WebSocket listener for live rig telemetry
    */
-  connectRigTelemetry(rigId: string, onFrame: (frame: GpuTelemetryFrame) => void, onError?: (err: any) => void): () => void {
+  connectRigTelemetry(rigId: string, onFrame: (frame: GpuTelemetryFrame) => void, onError?: (err: unknown) => void): () => void {
     const url = `${this.wsUrl}/ws/rigs/${rigId}/watch`;
     let ws: WebSocket | null = null;
     let shouldReconnect = true;
