@@ -1,0 +1,39 @@
+changelog:
+  exclude:
+    labels:
+      - 'ignore-for-release'
+      - 'stale'
+    authors:
+      - 'dependabot[bot]'
+  categories:
+    - title: '🚀 Features & Architectural Enhancements'
+      labels:
+        - 'feature'
+        - 'feat'
+        - 'enhancement'
+    - title: '🐛 Bug Fixes & Stability'
+      labels:
+        - 'fix'
+        - 'bug'
+    - title: '⚡ Performance & Optimization'
+      labels:
+        - 'perf'
+        - 'performance'
+    - title: '📚 Documentation & Guides'
+      labels:
+        - 'docs'
+        - 'documentation'
+    - title: '🧪 Testing & Verification'
+      labels:
+        - 'test'
+        - 'tests'
+    - title: '🔧 Tooling, CI/CD & Maintenance'
+      labels:
+        - 'chore'
+        - 'ci'
+        - 'build'
+        - 'refactor'
+    - title: '⚠️ Breaking Changes'
+      labels:
+        - 'breaking'
+        - 'breaking-change'

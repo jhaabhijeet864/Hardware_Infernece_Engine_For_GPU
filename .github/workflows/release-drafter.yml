@@ -1,0 +1,50 @@
+name: "Release Drafter"
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    name: Update Draft Release Notes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Cumulative Release Notes
+        id: generate_draft
+        run: |
+          node scripts/release-notes-generator.mjs \
+            --dry-run \
+            --output draft-notes.md \
+            --output-version draft-version.txt
+
+          TARGET_VER=$(cat draft-version.txt)
+          echo "target_version=$TARGET_VER" >> $GITHUB_OUTPUT
+          echo "target_tag=v$TARGET_VER" >> $GITHUB_OUTPUT
+
+      - name: Update or Create GitHub Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.generate_draft.outputs.target_tag }}
+          name: "${{ steps.generate_draft.outputs.target_tag }} (Draft Preview)"
+          body_path: draft-notes.md
+          draft: true
+          prerelease: false
