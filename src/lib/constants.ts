@@ -141,6 +141,48 @@ export const GPU_DATABASE: Omit<GPURecommendation, 'utilization' | 'isOptimal' |
     type: 'Unified',
     iconType: 'unified',
   },
+  {
+    id: 'dual-rtx-4090',
+    name: '2x NVIDIA RTX 4090 (TP=2)',
+    vram: 48,
+    type: 'GDDR6X',
+    iconType: 'consumer',
+  },
+  {
+    id: 'quad-rtx-4090',
+    name: '4x NVIDIA RTX 4090 (TP=4)',
+    vram: 96,
+    type: 'GDDR6X',
+    iconType: 'datacenter',
+  },
+  {
+    id: 'dual-l40s',
+    name: '2x NVIDIA L40S (TP=2)',
+    vram: 96,
+    type: 'GDDR6',
+    iconType: 'datacenter',
+  },
+  {
+    id: 'quad-l40s',
+    name: '4x NVIDIA L40S (TP=4)',
+    vram: 192,
+    type: 'GDDR6',
+    iconType: 'datacenter',
+  },
+  {
+    id: 'dual-a100-80gb',
+    name: '2x NVIDIA A100 80GB (TP=2)',
+    vram: 160,
+    type: 'HBM2e',
+    iconType: 'datacenter',
+  },
+  {
+    id: 'octa-h100',
+    name: '8x NVIDIA H100 80GB (TP=8)',
+    vram: 640,
+    type: 'HBM3',
+    iconType: 'datacenter',
+  },
 ]
 
 export const CONTEXT_LENGTH_OPTIONS = [512, 2048, 4096, 8192, 16384, 32768, 65536, 131072]

@@ -1,18 +1,27 @@
 import { useMemo } from 'react'
-import { VideoCamera, Desktop, Warning, FunnelSimple, DeviceMobile, CheckCircle } from '@phosphor-icons/react'
+import { Desktop, Warning, FunnelSimple, CheckCircle, Cpu } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { GPU_DATABASE } from '@/lib/constants'
 import { calculateMemoryOccupancy } from '@/lib/calculator'
 
 interface GPURecommendationsProps {
   requiredVRAM: number
+  perGpuVRAM?: number
+  tensorParallelSize?: number
 }
 
-export function GPURecommendations({ requiredVRAM }: GPURecommendationsProps) {
+export function GPURecommendations({
+  requiredVRAM,
+  perGpuVRAM,
+  tensorParallelSize = 1,
+}: GPURecommendationsProps) {
+  const isMultiGpu = tensorParallelSize > 1
+
   const gpuRecommendations = useMemo(() => {
     return GPU_DATABASE.map((gpu) => {
+      // If multi-GPU, compare against total cluster VRAM
       const occupancy = calculateMemoryOccupancy(requiredVRAM, gpu.vram)
-      const isOptimal = occupancy >= 50 && occupancy <= 85
+      const isOptimal = occupancy >= 45 && occupancy <= 85
       const isTight = occupancy > 85 && occupancy <= 100
       const isInsufficient = occupancy > 100
       
@@ -37,8 +46,19 @@ export function GPURecommendations({ requiredVRAM }: GPURecommendationsProps) {
     <section className="glass-panel p-6 rounded-2xl flex-1 flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h3 className="text-lg font-bold text-white">Hardware Matchmaker</h3>
-          <p className="text-xs text-muted-foreground">Ranked by estimated memory headroom</p>
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <span>Hardware Matchmaker</span>
+            {isMultiGpu && (
+              <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-mono">
+                TP={tensorParallelSize} Cluster
+              </span>
+            )}
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            {isMultiGpu && perGpuVRAM
+              ? `Ranked for ${requiredVRAM.toFixed(1)} GiB total (${perGpuVRAM.toFixed(1)} GiB per GPU)`
+              : 'Ranked by estimated memory headroom'}
+          </p>
         </div>
         <button className="text-muted-foreground hover:text-white transition-colors" title="Filter GPUs">
           <FunnelSimple size={20} />
@@ -90,81 +110,57 @@ export function GPURecommendations({ requiredVRAM }: GPURecommendationsProps) {
                     ? 'bg-red-500/20 text-red-400'
                     : gpu.iconType === 'datacenter'
                     ? 'bg-accent/20 text-accent'
-                    : gpu.iconType === 'unified'
-                    ? 'bg-primary/20 text-primary'
                     : 'bg-primary/20 text-primary'
                 }`}>
                   {gpu.isInsufficient ? (
                     <Warning size={18} weight="duotone" />
                   ) : gpu.iconType === 'datacenter' ? (
                     <Desktop size={18} weight="duotone" />
-                  ) : gpu.iconType === 'unified' ? (
-                    <DeviceMobile size={18} weight="duotone" />
                   ) : (
-                    <VideoCamera size={18} weight="duotone" />
+                    <Cpu size={18} weight="duotone" />
                   )}
                 </div>
                 <div>
-                  <p className={`font-bold text-sm ${
-                    gpu.isOptimal || !gpu.isInsufficient ? 'text-white' : 'text-muted-foreground'
-                  }`}>
+                  <h4 className="font-bold text-sm text-white group-hover:text-primary transition-colors">
                     {gpu.name}
+                  </h4>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    {gpu.vram} GB {gpu.type}
                   </p>
-                  <div className="flex gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
-                    <span className="px-1.5 py-0.5 bg-surface-highlight rounded border border-border text-white">
-                      {gpu.vram} GB VRAM
-                    </span>
-                    {gpu.type && (
-                      <span className="px-1.5 py-0.5 bg-surface-highlight rounded border border-border">
-                        {gpu.type}
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
               <div className="text-right">
-                <p className={`font-mono font-bold text-sm ${
+                <span className={`text-xs font-mono font-bold ${
                   gpu.isOptimal
                     ? 'text-emerald-400'
                     : gpu.isTight
                     ? 'text-amber-400'
                     : gpu.isInsufficient
                     ? 'text-red-400'
-                    : gpu.occupancy < 50
-                    ? 'text-accent'
-                    : 'text-primary'
+                    : 'text-white'
                 }`}>
-                  {gpu.occupancy}%
-                </p>
-                <p className="text-[10px] text-muted-foreground">Memory Occupancy</p>
+                  {gpu.occupancy > 999 ? '>999%' : `${gpu.occupancy.toFixed(0)}%`}
+                </span>
+                <p className="text-[10px] text-muted-foreground">Occupancy</p>
               </div>
             </div>
             
-            <div className="w-full bg-surface-highlight h-1.5 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(gpu.occupancy, 100)}%` }}
-                transition={{ delay: index * 0.05 + 0.2, duration: 0.5, ease: 'easeOut' }}
-                className={`h-full rounded-full ${
+            <div className="w-full bg-secondary/50 rounded-full h-1.5 overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-500 ${
                   gpu.isOptimal
                     ? 'bg-emerald-500'
                     : gpu.isTight
                     ? 'bg-amber-500'
                     : gpu.isInsufficient
                     ? 'bg-red-500'
-                    : gpu.occupancy < 50
-                    ? 'bg-accent'
                     : 'bg-primary'
                 }`}
+                style={{ width: `${Math.min(100, gpu.occupancy)}%` }}
               />
             </div>
           </motion.div>
         ))}
-      </div>
-
-      <div className="mt-4 pt-3 border-t border-border/50 text-[11px] text-muted-foreground flex items-center gap-1.5">
-        <span className="size-1.5 rounded-full bg-cyan-400 shrink-0" />
-        <span>Occupancy is an analytical estimate. Hardware acceptance requires empirical runtime validation.</span>
       </div>
     </section>
   )

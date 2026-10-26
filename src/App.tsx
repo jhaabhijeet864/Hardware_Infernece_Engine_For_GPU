@@ -225,6 +225,8 @@ function App() {
               
               <GPURecommendations
                 requiredVRAM={workloadSizing.peakMemory.totalVRAMRequiredGiB}
+                perGpuVRAM={workloadSizing.peakMemory.perGpuVRAMRequiredGiB}
+                tensorParallelSize={workloadSizing.peakMemory.tensorParallelSize}
               />
             </div>
 
