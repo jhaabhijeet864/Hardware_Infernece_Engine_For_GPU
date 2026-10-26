@@ -10,7 +10,7 @@ import { AcceptanceComparisonView } from '@/components/AcceptanceComparisonView'
 import { AcceptanceCertificate } from '@/components/AcceptanceCertificate'
 import { PartnerDecisionMatrix } from '@/components/PartnerDecisionMatrix'
 import { Header } from '@/components/Header'
-import { Lightning, ChartBar, ShieldCheck, SealCheck, Desktop } from '@phosphor-icons/react'
+import { Lightning, ChartBar, SlidersHorizontal, SealCheck, Desktop, ArrowRight } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 import { Toaster } from '@/components/ui/sonner'
 import { calculateMemoryRequirements } from '@/lib/calculator'
@@ -58,15 +58,15 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background grid-pattern flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col text-foreground">
       <Header />
       
-      <div className="flex-1 flex flex-col max-w-[1440px] mx-auto w-full p-6 gap-6 overflow-y-auto">
-        {/* Navigation Tabs */}
+      <main className="flex-1 flex flex-col max-w-[1440px] mx-auto w-full p-4 sm:p-6 gap-6">
+        {/* Modern Segmented Navigation Bar */}
         <nav
           role="tablist"
           aria-label="Calculator modes"
-          className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 bg-card p-1 rounded-xl border border-border w-full max-w-5xl mx-auto mb-2"
+          className="grid grid-cols-2 sm:grid-cols-5 gap-1 bg-[#10121a] p-1 rounded-lg border border-border w-full max-w-5xl mx-auto shadow-sm"
         >
           <button
             role="tab"
@@ -74,22 +74,14 @@ function App() {
             aria-controls="tabpanel-inference"
             id="tab-inference"
             onClick={() => setActiveTab('inference')}
-            className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-lg relative overflow-hidden group transition-all min-h-[44px] ${
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md transition-all text-xs font-medium cursor-pointer ${
               activeTab === 'inference'
-                ? 'bg-primary/20 border border-primary/50 text-white'
-                : 'text-muted-foreground hover:text-white hover:bg-surface-highlight'
+                ? 'bg-[#181b25] text-white border border-[#2b3040] shadow-sm'
+                : 'text-muted-foreground hover:text-white hover:bg-[#151720]'
             }`}
           >
-            {activeTab === 'inference' && (
-              <div className="absolute inset-0 bg-primary/10 blur-sm group-hover:bg-primary/20 transition-all" />
-            )}
-            <span className="relative z-10 font-bold tracking-wide flex items-center gap-1.5 text-xs sm:text-sm">
-              <ShieldCheck size={18} weight="duotone" className="text-cyan-400 shrink-0" aria-hidden="true" />
-              <span>1. Workload Sizing</span>
-            </span>
-            {activeTab === 'inference' && (
-              <div className="absolute bottom-0 h-[2px] w-1/3 bg-primary shadow-[0_0_10px_oklch(0.59_0.24_305)]" />
-            )}
+            <SlidersHorizontal size={16} className={activeTab === 'inference' ? 'text-primary' : 'text-muted-foreground'} />
+            <span>Workload Sizing</span>
           </button>
 
           <button
@@ -98,32 +90,24 @@ function App() {
             aria-controls="tabpanel-acceptance"
             id="tab-acceptance"
             onClick={() => setActiveTab('acceptance')}
-            className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-lg relative overflow-hidden group transition-all min-h-[44px] ${
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md transition-all text-xs font-medium cursor-pointer ${
               activeTab === 'acceptance'
-                ? 'bg-primary/20 border border-primary/50 text-white'
-                : 'text-muted-foreground hover:text-white hover:bg-surface-highlight'
+                ? 'bg-[#181b25] text-white border border-[#2b3040] shadow-sm'
+                : 'text-muted-foreground hover:text-white hover:bg-[#151720]'
             }`}
           >
-            {activeTab === 'acceptance' && (
-              <div className="absolute inset-0 bg-primary/10 blur-sm group-hover:bg-primary/20 transition-all" />
-            )}
-            <span className="relative z-10 font-bold tracking-wide flex items-center gap-1.5 text-xs sm:text-sm">
-              <SealCheck size={18} weight="duotone" className="text-emerald-400 shrink-0" aria-hidden="true" />
-              <span>2. Acceptance Reports</span>
-              {qualificationBundle && (
-                <span
-                  className={`text-[9px] px-1 py-0.2 rounded font-bold uppercase ${
-                    qualificationBundle.qualification_verdict.overall === 'PASSED'
-                      ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'bg-red-500/20 text-red-400'
-                  }`}
-                >
-                  {qualificationBundle.qualification_verdict.overall === 'PASSED' ? 'PASS' : 'FAIL'}
-                </span>
-              )}
-            </span>
-            {activeTab === 'acceptance' && (
-              <div className="absolute bottom-0 h-[2px] w-1/3 bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+            <SealCheck size={16} className={activeTab === 'acceptance' ? 'text-emerald-400' : 'text-muted-foreground'} />
+            <span>Acceptance Reports</span>
+            {qualificationBundle && (
+              <span
+                className={`text-[9px] px-1 py-0.2 rounded font-mono font-bold uppercase ${
+                  qualificationBundle.qualification_verdict.overall === 'PASSED'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-red-500/15 text-red-400 border border-red-500/30'
+                }`}
+              >
+                {qualificationBundle.qualification_verdict.overall === 'PASSED' ? 'PASS' : 'FAIL'}
+              </span>
             )}
           </button>
 
@@ -133,22 +117,14 @@ function App() {
             aria-controls="tabpanel-decision-matrix"
             id="tab-decision-matrix"
             onClick={() => setActiveTab('decision-matrix')}
-            className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-lg relative overflow-hidden group transition-all min-h-[44px] ${
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md transition-all text-xs font-medium cursor-pointer ${
               activeTab === 'decision-matrix'
-                ? 'bg-primary/20 border border-primary/50 text-white'
-                : 'text-muted-foreground hover:text-white hover:bg-surface-highlight'
+                ? 'bg-[#181b25] text-white border border-[#2b3040] shadow-sm'
+                : 'text-muted-foreground hover:text-white hover:bg-[#151720]'
             }`}
           >
-            {activeTab === 'decision-matrix' && (
-              <div className="absolute inset-0 bg-primary/10 blur-sm group-hover:bg-primary/20 transition-all" />
-            )}
-            <span className="relative z-10 font-bold tracking-wide flex items-center gap-1.5 text-xs sm:text-sm">
-              <Desktop size={18} weight="duotone" className="text-cyan-300 shrink-0" aria-hidden="true" />
-              <span>3. OEM Matrix</span>
-            </span>
-            {activeTab === 'decision-matrix' && (
-              <div className="absolute bottom-0 h-[2px] w-1/3 bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
-            )}
+            <Desktop size={16} className={activeTab === 'decision-matrix' ? 'text-primary' : 'text-muted-foreground'} />
+            <span>OEM Matrix</span>
           </button>
           
           <button
@@ -157,23 +133,14 @@ function App() {
             aria-controls="tabpanel-training"
             id="tab-training"
             onClick={() => setActiveTab('training')}
-            className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-lg relative overflow-hidden transition-all min-h-[44px] ${
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md transition-all text-xs font-medium cursor-pointer ${
               activeTab === 'training'
-                ? 'bg-primary/20 border border-primary/50 text-white'
-                : 'text-muted-foreground hover:text-white hover:bg-surface-highlight'
+                ? 'bg-[#181b25] text-white border border-[#2b3040] shadow-sm'
+                : 'text-muted-foreground hover:text-white hover:bg-[#151720]'
             }`}
           >
-            {activeTab === 'training' && (
-              <div className="absolute inset-0 bg-primary/10 blur-sm transition-all" />
-            )}
-            <span className="relative z-10 font-medium tracking-wide flex items-center gap-1.5 text-xs sm:text-sm">
-              <Lightning size={18} weight="duotone" className="text-amber-400 shrink-0" aria-hidden="true" />
-              <span>Fine-Tuning</span>
-              <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Exp</span>
-            </span>
-            {activeTab === 'training' && (
-              <div className="absolute bottom-0 h-[2px] w-1/3 bg-primary shadow-[0_0_10px_oklch(0.59_0.24_305)]" />
-            )}
+            <Lightning size={16} className={activeTab === 'training' ? 'text-amber-400' : 'text-muted-foreground'} />
+            <span>Fine-Tuning</span>
           </button>
           
           <button
@@ -182,23 +149,14 @@ function App() {
             aria-controls="tabpanel-quantization"
             id="tab-quantization"
             onClick={() => setActiveTab('quantization')}
-            className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-lg relative overflow-hidden transition-all min-h-[44px] ${
+            className={`flex items-center justify-center gap-2 py-2 px-3 rounded-md transition-all text-xs font-medium cursor-pointer ${
               activeTab === 'quantization'
-                ? 'bg-primary/20 border border-primary/50 text-white'
-                : 'text-muted-foreground hover:text-white hover:bg-surface-highlight'
+                ? 'bg-[#181b25] text-white border border-[#2b3040] shadow-sm'
+                : 'text-muted-foreground hover:text-white hover:bg-[#151720]'
             }`}
           >
-            {activeTab === 'quantization' && (
-              <div className="absolute inset-0 bg-primary/10 blur-sm transition-all" />
-            )}
-            <span className="relative z-10 font-medium tracking-wide flex items-center gap-1.5 text-xs sm:text-sm">
-              <ChartBar size={18} weight="duotone" className="text-purple-400 shrink-0" aria-hidden="true" />
-              <span>Quantization</span>
-              <span className="text-[9px] px-1 py-0.2 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">Exp</span>
-            </span>
-            {activeTab === 'quantization' && (
-              <div className="absolute bottom-0 h-[2px] w-1/3 bg-primary shadow-[0_0_10px_oklch(0.59_0.24_305)]" />
-            )}
+            <ChartBar size={16} className={activeTab === 'quantization' ? 'text-purple-400' : 'text-muted-foreground'} />
+            <span>Quantization</span>
           </button>
         </nav>
 
@@ -222,38 +180,35 @@ function App() {
                 memoryBreakdown={memoryBreakdown}
                 workloadSizing={workloadSizing}
               />
-              
               <GPURecommendations
                 requiredVRAM={workloadSizing.peakMemory.totalVRAMRequiredGiB}
-                perGpuVRAM={workloadSizing.peakMemory.perGpuVRAMRequiredGiB}
-                tensorParallelSize={workloadSizing.peakMemory.tensorParallelSize}
               />
             </div>
 
-            {/* OEM & Partner Hardware Decision Matrix */}
+            {/* OEM & Partner Hardware Decision Matrix Preview */}
             <div className="lg:col-span-12">
               <PartnerDecisionMatrix workload={workload} />
             </div>
 
-            {/* Quick action bridge to acceptance reports */}
-            <div className="lg:col-span-12 p-4 rounded-xl bg-surface-dark/90 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-[0_0_15px_rgba(34,211,238,0.08)]">
+            {/* Hardware Benchmark Verification Callout */}
+            <div className="lg:col-span-12 p-4 rounded-xl bg-[#10121a] border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="size-9 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-500/30">
-                  <SealCheck size={22} weight="duotone" />
+                <div className="size-8 rounded-lg bg-[#181b25] text-primary flex items-center justify-center shrink-0 border border-border">
+                  <SealCheck size={20} weight="bold" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Have you benchmarked physical hardware?</p>
-                  <p className="text-xs text-muted-foreground">
-                    Ingest <code className="text-cyan-300 font-mono">qualification-run.json</code> from <code className="text-primary font-mono">npx hw-qual run</code> to compare empirical telemetry and export official delivery acceptance certificates.
+                  <p className="text-sm font-semibold text-foreground">Benchmark Physical Workstation Hardware</p>
+                  <p className="text-xs text-muted-foreground font-mono">
+                    Run <code className="text-primary font-semibold">npx hw-qual run</code> on your target rig and ingest <code className="text-slate-300">qualification-run.json</code> to generate verified acceptance certificates.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setActiveTab('acceptance')}
-                className="px-4 py-2 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold shrink-0 transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-md bg-[#181b25] hover:bg-[#202532] text-foreground border border-border text-xs font-mono font-medium shrink-0 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
-                <span>Inspect Acceptance Reports</span>
-                <span>→</span>
+                <span>View Acceptance Reports</span>
+                <ArrowRight size={13} />
               </button>
             </div>
           </div>
@@ -265,9 +220,9 @@ function App() {
             id="tabpanel-acceptance"
             role="tabpanel"
             aria-labelledby="tab-acceptance"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="flex flex-col gap-6"
           >
             <BundleUploader
@@ -283,15 +238,15 @@ function App() {
           </motion.div>
         )}
 
-        {/* OEM Decision Matrix Tab (Phase 5) */}
+        {/* OEM Decision Matrix Tab */}
         {activeTab === 'decision-matrix' && (
           <motion.div
             id="tabpanel-decision-matrix"
             role="tabpanel"
             aria-labelledby="tab-decision-matrix"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="flex flex-col gap-6"
           >
             <PartnerDecisionMatrix workload={workload} />
@@ -304,9 +259,9 @@ function App() {
             id="tabpanel-training"
             role="tabpanel"
             aria-labelledby="tab-training"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
             <TrainingCalculator />
           </motion.div>
@@ -318,27 +273,25 @@ function App() {
             id="tabpanel-quantization"
             role="tabpanel"
             aria-labelledby="tab-quantization"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
             <QuantizationComparison />
           </motion.div>
         )}
 
-        {/* Footer */}
-        <footer className="mt-8 pt-6 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+        {/* Engineering Standards Footer */}
+        <footer className="mt-8 pt-5 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground font-mono">
           <p>
-            Local AI Hardware Qualification Suite • Target: NVIDIA Workstations &amp; Serving Rigs (vLLM / TensorRT-LLM)
+            Hardware Qualification Engine • Physical Telemetry &amp; Analytical Sizing for NVIDIA Ada, Hopper &amp; Blackwell
           </p>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-highlight border border-border">
-              <span className="size-1.5 rounded-full bg-emerald-400" />
-              Engine v2.0 Active
-            </span>
+          <div className="flex items-center gap-2">
+            <span className="size-1.5 rounded-full bg-emerald-400" />
+            <span className="text-slate-400">vLLM 0.7.x / TRT-LLM Compatible</span>
           </div>
         </footer>
-      </div>
+      </main>
       
       <Toaster position="bottom-right" richColors />
     </div>
