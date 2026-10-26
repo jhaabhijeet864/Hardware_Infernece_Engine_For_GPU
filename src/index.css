@@ -11,11 +11,13 @@
     background-color: var(--background);
     color: var(--foreground);
     letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', system-ui, sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
   
   .font-mono, .numeric, code, kbd, samp {
@@ -29,48 +31,64 @@
     height: 14px;
     border-radius: 9999px;
     background: #38bdf8;
-    border: 2px solid #090a0f;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    border: 2px solid #07080c;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
     cursor: pointer;
   }
 
   input[type="range"]::-webkit-slider-runnable-track {
-    background: #1e222d;
+    background: #181d27;
     height: 6px;
     border-radius: 9999px;
+  }
+
+  /* Sleek Scrollbars */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.24);
   }
 }
 
 :root {
-  --background: #090a0f;
-  --foreground: #f3f4f6;
+  --background: #07080c;
+  --foreground: #f4f5f8;
 
-  --card: #11131a;
-  --card-foreground: #f3f4f6;
+  --card: #0d1017;
+  --card-foreground: #f4f5f8;
   
-  --popover: #11131a;
-  --popover-foreground: #f3f4f6;
+  --popover: #0f121a;
+  --popover-foreground: #f4f5f8;
 
   --primary: #38bdf8;
-  --primary-foreground: #090a0f;
+  --primary-foreground: #07080c;
 
-  --secondary: #181b24;
+  --secondary: #141824;
   --secondary-foreground: #e2e8f0;
 
-  --muted: #181b24;
-  --muted-foreground: #8b949e;
+  --muted: #131722;
+  --muted-foreground: #94a3b8;
 
-  --accent: #1e222d;
-  --accent-foreground: #f3f4f6;
+  --accent: #191f2e;
+  --accent-foreground: #f4f5f8;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --border: #232733;
-  --input: #232733;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.1);
   --ring: #38bdf8;
 
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
   --chart-1: #38bdf8;
   --chart-2: #10b981;
@@ -78,8 +96,8 @@
   --chart-4: #818cf8;
   --chart-5: #ec4899;
 
-  --surface-highlight: #1a1e28;
-  --surface-dark: #0d0f15;
+  --surface-highlight: rgba(255, 255, 255, 0.04);
+  --surface-dark: #0a0c12;
 }
 
 @theme {
@@ -108,22 +126,51 @@
 
   --radius-sm: calc(var(--radius) * 0.75);
   --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) * 1.5);
-  --radius-xl: calc(var(--radius) * 2);
-  --radius-2xl: calc(var(--radius) * 2.5);
+  --radius-lg: calc(var(--radius) * 1.4);
+  --radius-xl: calc(var(--radius) * 1.8);
+  --radius-2xl: calc(var(--radius) * 2.2);
   --radius-full: 9999px;
 }
 
-/* Subtle architectural subtle gradient for depth */
-.instrument-surface {
-  background: linear-gradient(180deg, #12141c 0%, #0d0f16 100%);
-  border: 1px solid var(--border);
+/* Scale AI Inspired Ambient Background and Lighting */
+.scale-ambient-bg {
+  background-color: #07080c;
+  background-image: 
+    radial-gradient(circle 900px at 50% -120px, rgba(56, 189, 248, 0.09) 0%, transparent 70%),
+    radial-gradient(circle 700px at 85% 150px, rgba(129, 140, 248, 0.06) 0%, transparent 60%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
 }
 
-.terminal-panel {
-  background-color: #08090d;
-  border: 1px solid #1e222d;
-  font-family: 'JetBrains Mono', monospace;
+/* Premium Scale AI Glass Card */
+.scale-card {
+  background: rgba(13, 16, 23, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.scale-card-interactive {
+  background: rgba(13, 16, 23, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scale-card-interactive:hover {
+  background: rgba(19, 23, 34, 0.8);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.scale-card-active {
+  background: rgba(18, 23, 35, 0.9);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 20px -2px rgba(56, 189, 248, 0.2), inset 0 1px 0 0 rgba(56, 189, 248, 0.3);
 }
 
 /* Print Stylesheet for Official Hardware Acceptance Certificates */
