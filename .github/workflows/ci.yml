@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
-    name: Lint, Test, and Build
+  monorepo-build-and-test:
+    name: Monorepo Lint, Test, and Build Matrix
     runs-on: ubuntu-latest
 
     steps:
@@ -27,11 +27,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linting
+      - name: Build shared packages
+        run: |
+          npm --prefix packages/types run build
+          npm --prefix packages/protocol run build
+          npm --prefix packages/core run build
+          npm --prefix packages/cli run build
+          npm --prefix packages/api-client run build
+          npm --prefix packages/ui run build
+          npm --prefix apps/server run build
+
+      - name: Run ESLint across monorepo
         run: npm run lint
 
-      - name: Run automated mathematical tests
-        run: npm run test
+      - name: Run package test suites
+        run: |
+          npm --prefix packages/core test
+          npm --prefix packages/cli test
+          npm test
 
-      - name: Build production bundle
+      - name: Build Web Application
         run: npm run build
