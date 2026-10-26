@@ -1,0 +1,30 @@
+{
+  "name": "@hardware-inference/desktop",
+  "version": "0.1.0",
+  "description": "Tauri 2.0 Native Windows System Tray & macOS Menu Bar Agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@hardware-inference/core": "^0.1.0",
+    "@hardware-inference/protocol": "^0.1.0",
+    "@hardware-inference/types": "^0.1.0",
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-notification": "^2.0.0",
+    "@tauri-apps/plugin-shell": "^2.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.7.2",
+    "vite": "^7.2.6"
+  }
+}
