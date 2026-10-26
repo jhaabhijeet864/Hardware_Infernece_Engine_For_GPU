@@ -31,7 +31,7 @@ export function calculateWeightBytes(paramCountB: number, precision: PrecisionFo
  * Computes exact KV cache memory in bytes based on model architecture parameters:
  * M_KV = 2 * L * H_KV * D_head * T * B * s
  *
- * For MLA (Multi-Head Latent Attention in DeepSeek-V3):
+ * For MLA (Multi-Head Latent Attention in DeepSeek-V3 / R1):
  * KV is projected into a compressed latent space (latent_dim 512 + rope_dim 64 = 576 dims per layer).
  */
 export function calculateKVCacheBytes(
@@ -63,12 +63,14 @@ export function calculateKVCacheBytes(
 
 /**
  * Calculates inference memory requirements with explicit mathematical formulas and full breakdown.
+ * Supports Tensor Parallelism (TP) sharding across multi-GPU rigs.
  */
 export function calculateInferenceWorkload(input: WorkloadEstimationInput): WorkloadEstimationResult {
   const batchSize = Math.max(1, input.batchSize ?? 1)
   const contextLength = Math.max(1, input.contextLength)
   const precision = input.precision
   const kvCachePrecision = input.kvCachePrecision ?? precision
+  const tp = Math.max(1, input.tensorParallelSize ?? 1)
 
   let arch: ModelArchitecture
   let isFallback = false
@@ -112,11 +114,11 @@ export function calculateInferenceWorkload(input: WorkloadEstimationInput): Work
   const kvCacheBytes = calculateKVCacheBytes(arch, contextLength, batchSize, kvCachePrecision)
   if (arch.attentionType === 'MLA') {
     assumptions.push(
-      `KV Cache (MLA): ${arch.numLayers} layers × 576 latent dim × ${contextLength} tokens × batch ${batchSize} × ${PRECISION_BYTES[kvCachePrecision]} bytes`
+      `KV Cache (MLA): ${arch.numLayers} layers × 576 latent dim × ${contextLength} tokens × batch ${batchSize} × ${PRECISION_BYTES[kvCachePrecision]} bytes (${kvCachePrecision})`
     )
   } else {
     assumptions.push(
-      `KV Cache (${arch.attentionType}): 2 × ${arch.numLayers} layers × ${arch.numKeyValueHeads} KV heads × ${arch.headDimension} head dim × ${contextLength} tokens × batch ${batchSize} × ${PRECISION_BYTES[kvCachePrecision]} bytes`
+      `KV Cache (${arch.attentionType}): 2 × ${arch.numLayers} layers × ${arch.numKeyValueHeads} KV heads × ${arch.headDimension} head dim × ${contextLength} tokens × batch ${batchSize} × ${PRECISION_BYTES[kvCachePrecision]} bytes (${kvCachePrecision})`
     )
   }
 
@@ -127,19 +129,38 @@ export function calculateInferenceWorkload(input: WorkloadEstimationInput): Work
     )
   }
 
+  // Check KV head divisibility by TP
+  if (tp > 1 && arch.attentionType !== 'MLA' && arch.numKeyValueHeads % tp !== 0) {
+    warnings.push(
+      `Attention KV heads count (${arch.numKeyValueHeads}) is not evenly divisible by Tensor Parallel size (${tp}). Serving engine will pad or replicate heads, increasing per-GPU memory slightly.`
+    )
+  }
+
   // 3. Activation Overhead (PagedAttention / FlashAttention inference buffer)
   // Typically 1.5% to 3% of weights + small runtime tensor buffer
   const activationOverheadBytes = Math.max(150 * 1024 * 1024, weightsBytes * 0.02)
   assumptions.push(`Activation buffer: ~2% working memory for intermediate tensor allocations`)
 
   // 4. CUDA Runtime & Driver Context Overhead
-  // Default ~750 MiB to 1.0 GiB for PyTorch/CUDA runtime context
+  // Default ~750 MiB to 1.0 GiB for PyTorch/CUDA runtime context per active GPU
   const cudaContextGiB = input.cudaRuntimeOverheadGiB ?? 0.8
   const cudaContextBytes = cudaContextGiB * 1024 * 1024 * 1024
-  assumptions.push(`CUDA Runtime & Driver Context: ${cudaContextGiB.toFixed(2)} GiB baseline`)
+  assumptions.push(`CUDA Runtime & Driver Context: ${cudaContextGiB.toFixed(2)} GiB per active GPU baseline`)
 
-  // Total
-  const totalBytes = weightsBytes + kvCacheBytes + activationOverheadBytes + cudaContextBytes
+  // 5. Multi-GPU Tensor Parallelism Sharding Calculations
+  const allReduceBufferBytes = tp > 1 ? 128 * 1024 * 1024 : 0
+  const perGpuWeightBytes = weightsBytes / tp
+  const perGpuKvBytes = kvCacheBytes / tp
+  const perGpuActivationBytes = activationOverheadBytes / tp + allReduceBufferBytes
+  const perGpuBytes = perGpuWeightBytes + perGpuKvBytes + perGpuActivationBytes + cudaContextBytes
+
+  const totalBytes = (perGpuWeightBytes + perGpuKvBytes + perGpuActivationBytes) * tp + (cudaContextBytes * tp)
+
+  if (tp > 1) {
+    assumptions.push(
+      `Tensor Parallelism (TP=${tp}): Weights & KV cache partitioned across ${tp} GPUs (${bytesToGiB(perGpuBytes)} GiB/GPU required).`
+    )
+  }
 
   const memory: ComponentMemoryBreakdown = {
     weightsGiB: bytesToGiB(weightsBytes),
@@ -148,10 +169,13 @@ export function calculateInferenceWorkload(input: WorkloadEstimationInput): Work
     kvCacheGB: bytesToGB(kvCacheBytes),
     activationOverheadGiB: bytesToGiB(activationOverheadBytes),
     activationOverheadGB: bytesToGB(activationOverheadBytes),
-    cudaContextGiB: parseFloat(cudaContextGiB.toFixed(2)),
-    cudaContextGB: bytesToGB(cudaContextBytes),
+    cudaContextGiB: parseFloat((cudaContextGiB * tp).toFixed(2)),
+    cudaContextGB: bytesToGB(cudaContextBytes * tp),
     totalVRAMRequiredGiB: bytesToGiB(totalBytes),
     totalVRAMRequiredGB: bytesToGB(totalBytes),
+    tensorParallelSize: tp,
+    perGpuVRAMRequiredGiB: bytesToGiB(perGpuBytes),
+    perGpuVRAMRequiredGB: bytesToGB(perGpuBytes),
   }
 
   return {
@@ -162,6 +186,7 @@ export function calculateInferenceWorkload(input: WorkloadEstimationInput): Work
     kvCachePrecision,
     contextLength,
     batchSize,
+    tensorParallelSize: tp,
     assumptions,
     warnings,
     formulaSummary: {
@@ -169,7 +194,7 @@ export function calculateInferenceWorkload(input: WorkloadEstimationInput): Work
         arch.attentionType === 'MLA'
           ? 'Layers × 576 × Context × Batch × BytesPerToken'
           : '2 × Layers × KV_Heads × Head_Dim × Context × Batch × BytesPerToken',
-      weightsFormula: 'Param_Count × Bytes_Per_Param',
+      weightsFormula: tp > 1 ? '(Param_Count × Bytes_Per_Param) / TP' : 'Param_Count × Bytes_Per_Param',
     },
   }
 }

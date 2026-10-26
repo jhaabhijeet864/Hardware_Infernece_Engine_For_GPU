@@ -13,7 +13,7 @@
     "build": "tsc -b --noCheck && vite build",
     "lint": "eslint .",
     "hw-qual": "npx tsx src/cli/runner.ts",
-    "test": "npx tsx src/lib/engine/__tests__/calculator.test.ts && npx tsx src/lib/engine/__tests__/workload.test.ts && npx tsx src/lib/engine/__tests__/bundle-validator.test.ts && npx tsx src/lib/engine/__tests__/delta-analysis.test.ts && npx tsx src/cli/__tests__/env-capture.test.ts && npx tsx src/cli/__tests__/adapter.test.ts && npx tsx src/cli/__tests__/bundle.test.ts",
+    "test": "npx tsx src/lib/engine/__tests__/calculator.test.ts && npx tsx src/lib/engine/__tests__/workload.test.ts && npx tsx src/lib/engine/__tests__/bundle-validator.test.ts && npx tsx src/lib/engine/__tests__/delta-analysis.test.ts && npx tsx src/lib/engine/__tests__/partner-matrix.test.ts && npx tsx src/cli/__tests__/env-capture.test.ts && npx tsx src/cli/__tests__/adapter.test.ts && npx tsx src/cli/__tests__/bundle.test.ts",
     "release:notes": "node scripts/release-notes-generator.mjs",
     "release:preview": "node scripts/release-notes-generator.mjs --dry-run",
     "optimize": "vite optimize",

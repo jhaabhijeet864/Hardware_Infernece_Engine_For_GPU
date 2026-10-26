@@ -24,6 +24,7 @@ export interface WorkloadSpecification {
   generationTokensP99: number
   concurrency: number // Active concurrent generating streams
   registeredUsersEstimated?: number
+  tensorParallelSize?: number // Number of GPUs in Tensor Parallel shard (default 1)
   sla: SlaTarget
 }
 
@@ -51,6 +52,7 @@ export const WORKLOAD_ARCHETYPES: WorkloadSpecification[] = [
     generationTokensP99: 1000,
     concurrency: 8,
     registeredUsersEstimated: 250,
+    tensorParallelSize: 1,
     sla: {
       maxTtftMs: 600,
       maxItlMs: 35,
@@ -71,6 +73,7 @@ export const WORKLOAD_ARCHETYPES: WorkloadSpecification[] = [
     generationTokensP99: 300,
     concurrency: 32,
     registeredUsersEstimated: 1000,
+    tensorParallelSize: 1,
     sla: {
       maxTtftMs: 300,
       maxItlMs: 25,
@@ -91,6 +94,7 @@ export const WORKLOAD_ARCHETYPES: WorkloadSpecification[] = [
     generationTokensP99: 2048,
     concurrency: 4,
     registeredUsersEstimated: 80,
+    tensorParallelSize: 1,
     sla: {
       maxTtftMs: 800,
       maxItlMs: 30,
@@ -100,7 +104,7 @@ export const WORKLOAD_ARCHETYPES: WorkloadSpecification[] = [
   {
     id: 'agentic-reasoner',
     name: 'Autonomous Agentic Reasoner',
-    description: 'Deep chain-of-thought exploration, tool calling, and structured JSON planning.',
+    description: 'Deep chain-of-thought exploration, tool calling, and structured JSON planning with multi-GPU acceleration.',
     modelId: 'llama-3.3-70b',
     runtime: 'vllm',
     precision: 'INT4',
@@ -111,6 +115,7 @@ export const WORKLOAD_ARCHETYPES: WorkloadSpecification[] = [
     generationTokensP99: 3000,
     concurrency: 2,
     registeredUsersEstimated: 30,
+    tensorParallelSize: 2,
     sla: {
       maxTtftMs: 700,
       maxItlMs: 35,
@@ -124,6 +129,7 @@ export const WORKLOAD_ARCHETYPES: WorkloadSpecification[] = [
  */
 export function calculateWorkloadMemory(workload: WorkloadSpecification): WorkloadMemorySizing {
   const modelArch = getModelArchitecture(workload.modelId)
+  const tp = Math.max(1, workload.tensorParallelSize ?? 1)
   
   const typicalTotalTokens = workload.promptTokensP50 + workload.generationTokensP50
   const peakTotalTokens = workload.promptTokensP99 + workload.generationTokensP99
@@ -135,6 +141,7 @@ export function calculateWorkloadMemory(workload: WorkloadSpecification): Worklo
     contextLength: typicalTotalTokens,
     batchSize: workload.concurrency,
     kvCachePrecision: workload.kvCachePrecision,
+    tensorParallelSize: tp,
     cudaRuntimeOverheadGiB: 0.8,
   })
 
@@ -145,14 +152,17 @@ export function calculateWorkloadMemory(workload: WorkloadSpecification): Worklo
     contextLength: peakTotalTokens,
     batchSize: workload.concurrency,
     kvCachePrecision: workload.kvCachePrecision,
+    tensorParallelSize: tp,
     cudaRuntimeOverheadGiB: 0.8,
   })
 
   let recommendation = 'Plausible memory fit. Empirical benchmark recommended before purchase approval.'
-  if (peakResult.memory.totalVRAMRequiredGiB > 80) {
-    recommendation = 'Workload requires multi-GPU server (e.g. 2x or 4x 80GB datacenter GPUs with tensor parallelism).'
+  if (tp > 1) {
+    recommendation = `Sharded with Tensor Parallelism (TP=${tp}): requires ${peakResult.memory.perGpuVRAMRequiredGiB.toFixed(1)} GiB per GPU across ${tp} GPUs (${peakResult.memory.totalVRAMRequiredGiB.toFixed(1)} GiB total).`
+  } else if (peakResult.memory.totalVRAMRequiredGiB > 80) {
+    recommendation = 'Workload requires multi-GPU server (e.g. 2x, 4x, or 8x 80GB datacenter GPUs with tensor parallelism).'
   } else if (peakResult.memory.totalVRAMRequiredGiB > 24) {
-    recommendation = 'Exceeds single 24GB consumer GPU. Workstation with 48GB (L40S / RTX 6000 Ada) or dual 24GB required.'
+    recommendation = 'Exceeds single 24GB consumer GPU. Workstation with 48GB (L40S / RTX 6000 Ada) or dual 24GB with TP=2 required.'
   }
 
   return {

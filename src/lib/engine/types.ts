@@ -38,6 +38,7 @@ export interface WorkloadEstimationInput {
   batchSize?: number // Concurrency (concurrent active streams), default 1
   kvCachePrecision?: PrecisionFormat
   cudaRuntimeOverheadGiB?: number
+  tensorParallelSize?: number // Number of GPUs in Tensor Parallel shard (e.g. 1, 2, 4, 8)
 }
 
 export interface ComponentMemoryBreakdown {
@@ -51,6 +52,9 @@ export interface ComponentMemoryBreakdown {
   cudaContextGB: number
   totalVRAMRequiredGiB: number
   totalVRAMRequiredGB: number
+  tensorParallelSize: number
+  perGpuVRAMRequiredGiB: number
+  perGpuVRAMRequiredGB: number
 }
 
 export interface WorkloadEstimationResult {
@@ -61,6 +65,7 @@ export interface WorkloadEstimationResult {
   kvCachePrecision: PrecisionFormat
   contextLength: number
   batchSize: number
+  tensorParallelSize: number
   assumptions: string[]
   warnings: string[]
   formulaSummary: {
